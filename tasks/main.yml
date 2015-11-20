@@ -1,0 +1,51 @@
+---
+  #role: psu-apply
+  #file: main.yml
+- name: fail if oracle_install_type is not defined
+  fail: msg="oracle_install_type is not defined for {{ ansible_hostname }}"
+  when: oracle_install_type is not defined
+  tags: always
+
+- name: fail if oracle_version is not defined
+  fail: msg="oracle_version is not defined for {{ ansible_hostname }}"
+  when: oracle_version is not defined
+  tags: always
+
+- name: Extract PSU and One-off patches
+  include: extract_files.yml
+  tags: extract_files
+
+- name: Stop EM Agent
+  shell: "{{ agent_home }}/bin/emctl stop agent"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  when: agent_home is defined
+  tags: stop_agent
+
+- name: Apply PSU on Single Instance Database Home
+  include: psu_si.yml
+  when: oracle_install_type == 'si' and not rollback_psu
+  tags: psu_si
+
+- name: Apply PSU to RAC cluster
+  include: psu_rac.yml
+  when: oracle_install_type == 'rac' and not rollback_psu
+  tags: psu_rac
+
+#Rollback PSU by defining variable: rollback_psu: true when calling this role
+- name: Rollback PSU on Single Instance Database Home
+  include: psu_rollback_si.yml
+  when: oracle_install_type == 'si' and rollback_psu
+  tags: rollback_si
+
+- name: Rollback PSU on RAC cluster
+  include: psu_rollback_rac.yml
+  when: oracle_install_type == 'rac' and rollback_psu
+  tags: rollback_rac
+
+- name: Start EM Agent
+  shell: "{{ agent_home }}/bin/emctl start agent"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  when: agent_home is defined
+  tags: start_agent

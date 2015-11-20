@@ -1,0 +1,44 @@
+---
+# Apply one-off patches that are not PSU version specific
+- name: Oneoff conflict check
+  shell: "{{ oracle_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ oracle_stage_install }}/{{ oracle_version }}/{{ item.patchid }}"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  with_items: oneoff_patches[oracle_version]|default([])
+  when: oneoff_patches[oracle_version] is defined
+  register: oneoff_conflicts
+
+- debug: var=oneoff_conflicts.results
+
+- name: Apply one-off patches
+  shell: "opatch apply -silent -local -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ oracle_stage_install }}/{{ oracle_version }}/{{ item.patchid }}"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  with_items: oneoff_patches[oracle_version]|default([])
+  when: oneoff_patches[oracle_version] is defined
+  register: oneoff_apply
+
+- debug: var=oneoff_apply.results
+
+#Apply PSU version specific one-off patches
+- name: Oneoff conflict check
+  shell: "{{ oracle_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ oracle_stage_install }}/{{ oracle_version }}/{{ item.patchid }}"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  with_items: oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([])
+  when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
+  register: oneoff_conflicts_psu
+
+- debug: var=oneoff_conflicts_psu.results
+
+- name: Apply one-off patches
+  shell: "opatch apply -silent -local -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ oracle_stage_install }}/{{ oracle_version }}/{{ item.patchid }}"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  with_items: oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([])
+  when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
+  register: oneoff_apply_psu
+
+- debug: var=oneoff_apply_psu.results

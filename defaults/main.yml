@@ -1,0 +1,3 @@
+---
+shutdown_listener: true # set to false if patching an empty oracle home (ie new 12c install)
+rollback_psu: false # set to true if rolling back current PSU.

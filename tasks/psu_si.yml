@@ -1,0 +1,85 @@
+---
+# psu-apply steps for single instance (SI) database home
+
+- name: SI | update opatch
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
+    dest: "{{ oracle_home }}"
+    copy: no
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: SI | check for conflicts
+  shell: "{{ oracle_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ oracle_stage_install }}/{{ oracle_version }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  register: opatch_conflicts
+
+- debug: var=opatch_conflicts.stdout_lines
+
+- name: SI | get list of database names on host
+  shell: cat /etc/oratab|grep {{ oracle_home }}|egrep ':N|:Y'|grep -v \*|cut -f1 -d':'
+  register: dblist
+  tags: datapatch
+
+- name: SI | shutdown databases running in oracle_home
+  shell: export ORACLE_SID={{ item }}; echo "shutdown immediate;" | {{ oracle_home }}/bin/sqlplus / as sysdba
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  with_items: dblist.stdout_lines
+
+- name: SI | shutdown listener in oracle_home
+  shell: "{{ oracle_home }}/bin/lsnrctl stop listener"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  when: shutdown_listener | default(false)
+  ignore_errors: true
+
+- name: SI | opatch apply
+  shell: "opatch apply -silent -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ oracle_stage_install }}/{{ oracle_version }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  register: opatch_apply
+
+- debug: var=opatch_apply.stdout_lines
+
+- name: SI | apply oneoff patches
+  include: oneoff_apply.yml
+
+- name: SI | startup databases
+  shell: export ORACLE_SID={{ item }}; echo "startup;" | {{ oracle_home }}/bin/sqlplus / as sysdba
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  with_items: dblist.stdout_lines
+
+- name: SI | 12.1 - startup pluggable databases
+  shell: export ORACLE_SID={{ item }}; echo "alter pluggable database all open;" | {{ oracle_home }}/bin/sqlplus / as sysdba
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  with_items: dblist.stdout_lines
+  when: oracle_version == '12.1.0.2'
+
+- name: Run Catbundle.sql
+  include: run_catbundle.yml
+  tags: catbundle
+
+- name: SI | startup listener in oracle_home
+  shell: "{{ oracle_home }}/bin/lsnrctl start listener"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  when: shutdown_listener | default(false)
+  ignore_errors: true
+
+- name: Check opatch lsinventory (DB)
+  shell: "{{ oracle_home }}/OPatch/opatch lsinventory"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  register: opatchls
+
+- debug: var=opatchls.stdout_lines

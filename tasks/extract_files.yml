@@ -1,0 +1,40 @@
+---
+
+- name: Create Patch directory
+  file:
+    path: "{{ oracle_stage_install }}/{{ oracle_version }}"
+    state: directory
+
+- name: Unzip PSU
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ psu[oracle_version][psu_name][oracle_install_type].filename }}"
+    dest: "{{ oracle_stage_install }}/{{ oracle_version }}/"
+    copy: no
+    creates: "{{ oracle_stage_install }}/{{ oracle_version }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}/README.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  run_once: true
+
+- name: Unzip oneoff patches
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ item.filename }}"
+    dest: "{{ oracle_stage_install }}/{{ oracle_version }}/"
+    copy: no
+    creates: "{{ oracle_stage_install }}/{{ oracle_version }}/{{ item.patchid }}/README.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  with_items: oneoff_patches[oracle_version]|default([])
+  when: oneoff_patches[oracle_version] is defined
+  run_once: true
+
+- name: Unzip oneoff patches (PSU version specific)
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ item.filename }}"
+    dest: "{{ oracle_stage_install }}/{{ oracle_version }}/"
+    copy: no
+    creates: "{{ oracle_stage_install }}/{{ oracle_version }}/{{ item.patchid }}/README.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  with_items: oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([])
+  when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
+  run_once: true

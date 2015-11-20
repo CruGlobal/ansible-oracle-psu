@@ -1,0 +1,88 @@
+---
+# Rollback current PSU
+
+- name: SI | get list of database names on host
+  shell: cat /etc/oratab|grep {{ oracle_home }}|egrep ':N|:Y'|grep -v \*|cut -f1 -d':'
+  register: dblist
+
+- name: SI | shutdown databases running in oracle_home
+  shell: export ORACLE_SID={{ item }}; echo "shutdown immediate;" | {{ oracle_home }}/bin/sqlplus / as sysdba
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  with_items: dblist.stdout_lines
+
+- name: SI | shutdown listener in oracle_home
+  shell: "{{ oracle_home }}/bin/lsnrctl stop listener"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  ignore_errors: true
+
+- name: SI | Rollback PSU Specific One-off Patches
+  shell: "{{ oracle_home }}/OPatch/opatch rollback -silent -id {{ item.patchid }}"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  with_items: oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([])
+  when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
+  register: oneoff_rollback
+
+- debug: var=oneoff_rollback.results
+
+- name: SI | Rollback PSU
+  shell: "{{ oracle_home }}/OPatch/opatch rollback -silent -id {{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  register: opatch_rollback
+
+- debug: var=opatch_rollback.stdout_lines
+
+- name: SI | startup databases
+  shell: export ORACLE_SID={{ item }}; echo "startup;" | {{ oracle_home }}/bin/sqlplus / as sysdba
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  with_items: dblist.stdout_lines
+
+- name: SI | startup pluggable databases (12c only)
+  shell: export ORACLE_SID={{ item }}; echo "alter pluggable database all open;" | {{ oracle_home }}/bin/sqlplus / as sysdba
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  with_items: dblist.stdout_lines
+  when: oracle_version == '12.1.0.2'
+
+- name: SI | run rollback sql script (11.2.0.4)
+  shell: export ORACLE_SID={{ item }}; echo exit | {{ oracle_home }}/bin/sqlplus / as sysdba @catbundle_PSU_{{ item }}_ROLLBACK.sql
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  register: catbundle
+  environment: env
+  with_items: dblist.stdout_lines
+  args:
+    chdir: "{{ oracle_home }}/rdbms/admin"
+  when: oracle_version == '11.2.0.4'
+
+# - debug: var=catbundle.results # too much output to be useful
+
+- name: SI | Run the datapatch utility (12.1.0.2)
+  shell: "export ORACLE_SID={{ item }}; ./datapatch -verbose"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  register: datapatch
+  args:
+    chdir: "{{ oracle_home }}/OPatch"
+  with_items: dblist.stdout_lines
+  when: oracle_version == '12.1.0.2'
+
+- debug: var=datapatch.stdout_lines
+  when: oracle_version == '12.1.0.2'
+
+- name: Check opatch lsinventory (DB)
+  shell: "{{ oracle_home }}/OPatch/opatch lsinventory"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  register: opatchls
+
+- debug: var=opatchls.stdout_lines

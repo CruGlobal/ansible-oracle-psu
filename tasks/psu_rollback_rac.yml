@@ -1,0 +1,89 @@
+---
+# Rollback current PSU
+
+- name: RAC | get list of database names on host
+  shell: srvctl config database
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  register: dblist
+  when: master_node
+
+- name: RAC | delete srvctl state file if it exists
+  file: path={{ oracle_home }}/srvm/admin/oneoffstop.txt state=absent
+
+- name: RAC | Shutdown Oracle Home on first node
+  shell: srvctl stop home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }} -f
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  when: master_node
+
+- name: RAC | Rollback One Off patches on first node
+  include: oneoff_rollback.yml
+  when: master_node
+
+- name: RAC | Startup Oracle Home on first node
+  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }}
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  when: master_node
+
+- name: RAC | Check if stuff is running
+  shell: "{{ grid_home }}/bin/crsctl stat res -t"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  when: master_node
+  register: stat_res_t
+
+- debug: var=stat_res_t.stdout_lines
+
+- name: RAC | Shutdown Oracle Home on second node
+  shell: srvctl stop home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }} -f
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  when: not master_node
+
+- name: RAC | Rollback One Off patches on second node
+  include: oneoff_rollback.yml
+  when: not master_node
+
+- name: RAC | Startup Oracle Home on first node
+  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }}
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  environment: env
+  when: not master_node
+
+- name: RAC | Check if stuff is running
+  shell: "{{ grid_home }}/bin/crsctl stat res -t"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  when: not master_node
+  register: stat_res_t
+
+- debug: var=stat_res_t.stdout_lines
+
+- name: RAC | run rollback sql script (11.2.0.4)
+  shell: export ORACLE_SID={{ item }}; echo exit | {{ oracle_home }}/bin/sqlplus / as sysdba @catbundle_PSU_{{ item }}_ROLLBACK.sql
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  register: catbundle
+  environment: env
+  with_items: dblist.stdout_lines
+  args:
+    chdir: "{{ oracle_home }}/rdbms/admin"
+  when: oracle_version == '11.2.0.4'
+  run_once: true
+
+# - debug: var=catbundle.results # too much output to be useful
+
+- name: Check opatch lsinventory (DB)
+  shell: "{{ oracle_home }}/OPatch/opatch lsinventory"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  register: opatchls
+
+- debug: var=opatchls.stdout_lines

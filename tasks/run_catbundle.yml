@@ -1,0 +1,30 @@
+---
+
+- name: 11.2 - Load Modified SQL Files into the Database
+  shell: export ORACLE_SID={{ item }}; echo exit | {{ oracle_home }}/bin/sqlplus / as sysdba @catbundle.sql psu apply
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  register: catbundle
+  environment: env
+  with_items: dblist.stdout_lines
+  args:
+    chdir: "{{ oracle_home }}/rdbms/admin"
+  when: oracle_version == '11.2.0.4'
+
+
+# - debug: var=catbundle.results # too much output to be useful
+
+- name: 12.1 - Load Modified SQL Files into the Database
+  shell: "export ORACLE_SID={{ item }}; ./datapatch -verbose"
+  sudo: yes
+  sudo_user: "{{ oracle_user }}"
+  register: datapatch
+  environment: env
+  with_items: dblist.stdout_lines
+  args:
+    chdir: "{{ oracle_home }}/OPatch"
+  failed_when: datapatch.rc == 1
+  when: oracle_version == '12.1.0.2'
+  ignore_errors: true
+
+- debug: var=datapatch
