@@ -13,6 +13,12 @@ Ansible role to apply Oracle quarterly patches (PSU) to single instance (SI) and
 
 * oneoff_patches: dictionary variable with list of one-off patches to apply for 12.1.0.2 and 11.2.0.4
 
+### defaults/main.yml
+
+* psu_name: July2015  # Should match psu dictionary variable defined in vars/main.yml
+* shutdown_listener: true # set to false if patching an empty oracle home (ie new 12c install)
+* rollback_psu: false # set to true if rolling back current PSU.
+
 ### Required Inventory Variables
 
 * oracle_install_type: valid values are SI or RAC.  Used to determine if host is a single instance database install or part of a RAC cluster.
