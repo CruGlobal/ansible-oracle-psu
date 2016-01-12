@@ -10,7 +10,7 @@
     group: "{{ oracle_group }}"
 
 - name: SI | check for conflicts
-  shell: "{{ oracle_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ oracle_stage_install }}/{{ oracle_version }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
+  shell: "{{ oracle_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   register: opatch_conflicts
@@ -38,7 +38,7 @@
   ignore_errors: true
 
 - name: SI | opatch apply
-  shell: "opatch apply -silent -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ oracle_stage_install }}/{{ oracle_version }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
+  shell: "opatch apply -silent -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   environment: env

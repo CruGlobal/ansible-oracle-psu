@@ -7,11 +7,19 @@
   sudo_user: "{{ oracle_user }}"
   environment: env
   register: dblist
-  when: master_node
+
+- debug: var=dblist.stdout_lines
+
+- name: RAC | Generate srvctl state file
+  template:
+    src: srvctl_state.j2
+    dest: "{{ oracle_home }}/srvm/admin/psu_state.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
 
 - name: RAC | delete srvctl state file if it exists
   file: path={{ oracle_home }}/srvm/admin/oneoffstop.txt state=absent
-  
+
 - name: RAC | Update opatch
   unarchive:
     src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
@@ -35,7 +43,7 @@
 - debug: var=lsinv_pre.results
 
 - name: RAC | Check PSU for conflicts
-  shell: "{{ item }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ oracle_stage_install }}/{{ oracle_version }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
+  shell: "{{ item }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   register: opatch_conflicts
@@ -44,7 +52,7 @@
     - "{{ grid_home|default(omit) }}"
 
 - name: RAC | Apply patch to first node
-  shell: "{{ grid_home }}/OPatch/opatch auto {{ oracle_stage_install }}/{{ oracle_version }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   sudo: yes
   sudo_user: root
   when: master_node
@@ -61,7 +69,7 @@
   when: master_node
 
 - name: RAC | Startup Oracle Home on first node
-  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }}
+  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   environment: env
@@ -76,8 +84,11 @@
 
 - debug: var=stat_res_t.stdout_lines
 
+- name: RAC | Pause after first node
+  pause: prompt="Verify everything's running on the first node."
+
 - name: RAC | Apply patch to second node
-  shell: "{{ grid_home }}/OPatch/opatch auto {{ oracle_stage_install }}/{{ oracle_version }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   sudo_user: root
   when: not master_node
 
@@ -93,7 +104,7 @@
   when: not master_node
 
 - name: RAC | Startup Oracle Home on second node
-  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }}
+  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   environment: env
@@ -111,3 +122,5 @@
     - "{{ oracle_home }}"
     - "{{ grid_home|default(omit) }}"
   register: lsinv_post
+
+- debug: var=lsinv_post.results

@@ -3,7 +3,15 @@
 # PSU information for RAC and Single Instance (11.2 and 12.1)
 psu:
   12.1.0.2:
-    July2015:
+    OCT2015:
+      patchversion: 12.1.0.2.5
+      rac:
+        filename: p21523234_121020_Linux-x86-64.zip
+        patchid: 21523234
+      si:
+        filename: p21359755_121020_Linux-x86-64.zip
+        patchid: 21359755
+    JUL2015:
       patchversion: 12.1.0.2.4
       rac:
         filename: p20996835_121020_Linux-x86-64.zip
@@ -13,7 +21,15 @@ psu:
         patchid: 20831110
 
   11.2.0.4:
-    July2015:
+    OCT2015:
+      patchversion: 11.2.0.4.8
+      rac:
+        filename: p21523375_112040_Linux-x86-64.zip
+        patchid: 21523375
+      si:
+        filename: p21352635_112040_Linux-x86-64.zip
+        patchid: 21352635
+    JUL2015:
       patchversion: 11.2.0.4.7
       rac:
         filename: p20996923_112040_Linux-x86-64.zip
@@ -26,12 +42,12 @@ psu:
 # Files should exist in path defined by oracle_stage_install.
 opatch:
   12.1.0.2:
-    version: 12.1.0.1.8
+    version: 12.1.0.1.10
     filename: p6880880_121010_Linux-x86-64.zip
-
   11.2.0.4:
-    version: 11.2.0.3.11
+    version: 11.2.0.3.12
     filename: p6880880_112000_Linux-x86-64.zip
+
 
 oneoff_patches:
   12.1.0.2:
@@ -41,10 +57,6 @@ oneoff_patches:
       filename: p21800251_121020_Linux-x86-64.zip
     - patchid: 20879889
       filename: p20879889_121020_Linux-x86-64.zip
-    #   # 17890099: ORA-2072 AND ORA-2063 ON QUERY VIA DBLINK
-    # - patchid: 17890099
-    #   filename: p17890099_121020_Linux-x86-64.zip
-      # 21821738: Merge patch for bug 19509982, 'Select Statement Throws ORA-01792 Error (Doc ID 1951689.1)'
     - patchid: 21821738
       filename: p21821738_121020_Linux-x86-64.zip
 
@@ -53,7 +65,9 @@ oneoff_patches:
     - patchid: 13542050
       filename: p13542050_121024_Linux-x86-64.zip
 
+  11.2.0.4.8:
+    - patchid: 17890099 # ORA-2072 AND ORA-2063 ON QUERY VIA DBLINK
+      filename: p17890099_112048_Linux-x86-64.zip
   11.2.0.4.7:
-    # ORA-2072 AND ORA-2063 ON QUERY VIA DBLINK
-    - patchid: 17890099
+    - patchid: 17890099 # ORA-2072 AND ORA-2063 ON QUERY VIA DBLINK
       filename: p17890099_112047_Linux-x86-64.zip

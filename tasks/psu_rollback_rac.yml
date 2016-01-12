@@ -7,7 +7,13 @@
   sudo_user: "{{ oracle_user }}"
   environment: env
   register: dblist
-  when: master_node
+
+- name: RAC | Generate srvctl state file
+  template:
+    src: srvctl_state.j2
+    dest: "{{ oracle_home }}/srvm/admin/psu_state.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
 
 - name: RAC | delete srvctl state file if it exists
   file: path={{ oracle_home }}/srvm/admin/oneoffstop.txt state=absent
@@ -23,8 +29,16 @@
   include: oneoff_rollback.yml
   when: master_node
 
+- name: RAC | Rollback PSU
+  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -rollback -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  sudo_user: root
+  register: rac_psu_rollback
+  when: master_node
+
+- debug: var=rac_psu_rollback.stdout_lines
+
 - name: RAC | Startup Oracle Home on first node
-  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }}
+  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   environment: env
@@ -50,8 +64,14 @@
   include: oneoff_rollback.yml
   when: not master_node
 
+- name: RAC | Rollback PSU on second node
+  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -rollback -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  sudo_user: root
+  register: rac_psu_rollback
+  when: not master_node
+
 - name: RAC | Startup Oracle Home on first node
-  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }}
+  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   environment: env
