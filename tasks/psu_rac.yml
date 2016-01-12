@@ -7,6 +7,7 @@
   sudo_user: "{{ oracle_user }}"
   environment: env
   register: dblist
+  tags: catbundle
 
 - debug: var=dblist.stdout_lines
 
