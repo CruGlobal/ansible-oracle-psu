@@ -1,15 +1,10 @@
 ---
   #role: psu-apply
   #file: main.yml
-- name: fail if oracle_install_type is not defined
-  fail: msg="oracle_install_type is not defined for {{ ansible_hostname }}"
-  when: oracle_install_type is not defined
-  tags: always
 
-- name: fail if oracle_version is not defined
-  fail: msg="oracle_version is not defined for {{ ansible_hostname }}"
-  when: oracle_version is not defined
-  tags: always
+- name: Run pre-check tasks
+  include: pre_checks.yml
+  tags: pre_checks
 
 - name: Extract PSU and One-off patches
   include: extract_files.yml
