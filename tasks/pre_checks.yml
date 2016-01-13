@@ -14,7 +14,8 @@
     path: "{{ oracle_stage_install }}/{{ psu[oracle_version][psu_name][oracle_install_type].filename }}"
   register: psu_st
 
-- fail: msg="Oops! The PSU zip file is missing."
+- name: Fail if PSU file is missing
+  fail: msg="Oops! The PSU zip file is missing."
   when: not psu_st.stat.exists
 
 
@@ -25,7 +26,8 @@
   with_items: oneoff_patches[oracle_version]|default([])
   when: oneoff_patches[oracle_version] is defined
 
-- fail: msg="Oops! Missing one-off patch {{ item.item.filename }}"
+- name: Fail if missing one-off patches
+  fail: msg="Oops! Missing one-off patch {{ item.item.filename }}"
   with_items: patch_st.results
   when:
     - oneoff_patches[oracle_version] is defined
@@ -38,7 +40,8 @@
   with_items: oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([])
   when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
 
-- fail: msg="Oops! Missing one-off patch {{ item.item.filename }}"
+- name: Fail if missing PSU-Specific one-off patches
+  fail: msg="Oops! Missing one-off patch {{ item.item.filename }}"
   with_items: patch_st.results
   when:
     - oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
@@ -49,6 +52,6 @@
     path: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
   register: opatch_st
 
-- fail: msg="Oops! Opatch zip file is missing."
+- name: Fail if Opatch zip file is missing
+  fail: msg="Oops! Opatch zip file is missing."
   when: not opatch_st.stat.exists
-  
