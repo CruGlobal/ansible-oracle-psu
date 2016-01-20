@@ -11,7 +11,7 @@
 - debug: var=oneoff_conflicts.results
 
 - name: Apply one-off patches
-  shell: "opatch apply -silent -local -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ patch_directory }}/{{ item.patchid }}"
+  shell: "opatch apply -silent -local -force -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ patch_directory }}/{{ item.patchid }}"
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   environment: env
