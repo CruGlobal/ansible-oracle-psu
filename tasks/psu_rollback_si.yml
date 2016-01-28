@@ -9,14 +9,14 @@
   shell: export ORACLE_SID={{ item }}; echo "shutdown immediate;" | {{ oracle_home }}/bin/sqlplus / as sysdba
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   with_items: dblist.stdout_lines
 
 - name: SI | shutdown listener in oracle_home
   shell: "{{ oracle_home }}/bin/lsnrctl stop listener"
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   ignore_errors: true
 
 - name: SI | Rollback PSU Specific One-off Patches
@@ -41,14 +41,14 @@
   shell: export ORACLE_SID={{ item }}; echo "startup;" | {{ oracle_home }}/bin/sqlplus / as sysdba
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   with_items: dblist.stdout_lines
 
 - name: SI | startup pluggable databases (12c only)
   shell: export ORACLE_SID={{ item }}; echo "alter pluggable database all open;" | {{ oracle_home }}/bin/sqlplus / as sysdba
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   with_items: dblist.stdout_lines
   when: oracle_version == '12.1.0.2'
 
@@ -57,7 +57,7 @@
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   register: catbundle
-  environment: env
+  environment: "{{ env }}"
   with_items: dblist.stdout_lines
   args:
     chdir: "{{ oracle_home }}/rdbms/admin"
@@ -69,7 +69,7 @@
   shell: "export ORACLE_SID={{ item }}; ./datapatch -verbose"
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   register: datapatch
   args:
     chdir: "{{ oracle_home }}/OPatch"

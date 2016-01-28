@@ -14,7 +14,7 @@
   shell: "opatch apply -silent -local -force -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ patch_directory }}/{{ item.patchid }}"
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   with_items: oneoff_patches[oracle_version]|default([])
   when: oneoff_patches[oracle_version] is defined
   register: oneoff_apply
@@ -36,7 +36,7 @@
   shell: "opatch apply -silent -local -force -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ patch_directory }}/{{ item.patchid }}"
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   with_items: oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([])
   when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
   register: oneoff_apply_psu

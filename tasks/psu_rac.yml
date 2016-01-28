@@ -5,7 +5,7 @@
   shell: srvctl config database
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   register: dblist
   tags: catbundle
 
@@ -62,7 +62,7 @@
   shell: srvctl stop home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }} -f
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   when: master_node
 
 - name: RAC | Apply One Off Patches to First node
@@ -73,7 +73,7 @@
   shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   when: master_node
 
 - name: RAC | Check if stuff is running
@@ -97,7 +97,7 @@
   shell: srvctl stop home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }} -f
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   when: not master_node
 
 - name: RAC | Apply One Off Patches to second node
@@ -108,7 +108,7 @@
   shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
   sudo: yes
   sudo_user: "{{ oracle_user }}"
-  environment: env
+  environment: "{{ env }}"
   when: not master_node
 
 - name: RAC | Run Catbundle Script

@@ -5,7 +5,7 @@
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   register: catbundle
-  environment: env
+  environment: "{{ env }}"
   with_items: dblist.stdout_lines
   args:
     chdir: "{{ oracle_home }}/rdbms/admin"
@@ -18,7 +18,7 @@
   sudo: yes
   sudo_user: "{{ oracle_user }}"
   register: datapatch
-  environment: env
+  environment: "{{ env }}"
   with_items: dblist.stdout_lines
   args:
     chdir: "{{ oracle_home }}/OPatch"
