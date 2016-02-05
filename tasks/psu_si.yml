@@ -11,8 +11,6 @@
 
 - name: SI | check for conflicts
   shell: "{{ oracle_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
   register: opatch_conflicts
 
 - debug: var=opatch_conflicts.stdout_lines
@@ -26,23 +24,17 @@
 
 - name: SI | shutdown databases running in oracle_home
   shell: export ORACLE_SID={{ item }}; echo "shutdown immediate;" | {{ oracle_home }}/bin/sqlplus / as sysdba
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   with_items: dblist.stdout_lines
 
 - name: SI | shutdown listener in oracle_home
   shell: "{{ oracle_home }}/bin/lsnrctl stop listener"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   when: shutdown_listener | default(false)
   ignore_errors: true
 
 - name: SI | opatch apply
   shell: "opatch apply -silent -force -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   register: opatch_apply
 
@@ -53,15 +45,11 @@
 
 - name: SI | startup databases
   shell: export ORACLE_SID={{ item }}; echo "startup;" | {{ oracle_home }}/bin/sqlplus / as sysdba
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   with_items: dblist.stdout_lines
 
 - name: SI | 12.1 - startup pluggable databases
   shell: export ORACLE_SID={{ item }}; echo "alter pluggable database all open;" | {{ oracle_home }}/bin/sqlplus / as sysdba
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   with_items: dblist.stdout_lines
   when: oracle_version == '12.1.0.2'
@@ -72,16 +60,12 @@
 
 - name: SI | startup listener in oracle_home
   shell: "{{ oracle_home }}/bin/lsnrctl start listener"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   when: shutdown_listener | default(false)
   ignore_errors: true
 
 - name: Check opatch lsinventory (DB)
   shell: "{{ oracle_home }}/OPatch/opatch lsinventory"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
   register: opatchls
 
 - debug: var=opatchls.stdout_lines

@@ -12,8 +12,6 @@
 
 - name: Stop EM Agent
   shell: "{{ agent_home }}/bin/emctl stop agent"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
   when: agent_home is defined
   tags: stop_agent
 
@@ -40,7 +38,7 @@
 
 - name: Start EM Agent
   shell: "{{ agent_home }}/bin/emctl start agent"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become: yes
+  become_user: "{{ oracle_user }}"
   when: agent_home is defined
   tags: start_agent

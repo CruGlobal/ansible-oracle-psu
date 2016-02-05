@@ -4,6 +4,8 @@
   file:
     path: "{{ patch_directory }}"
     state: directory
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
   run_once: true
 
 - name: Unzip PSU
@@ -24,8 +26,8 @@
     creates: "{{ patch_directory }}/{{ item.patchid }}/README.txt"
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
-  with_items: oneoff_patches[oracle_version]|default([])
-  when: oneoff_patches[oracle_version] is defined
+  with_items: "{{ oneoff_patches[oracle_version]|default([]) }}"
+  when: "{{ oneoff_patches[oracle_version] }} is defined"
   run_once: true
 
 - name: Unzip oneoff patches (PSU version specific)
