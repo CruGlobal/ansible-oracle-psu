@@ -23,8 +23,8 @@
   stat:
     path: "{{ oracle_stage_install }}/{{ item.filename }}"
   register: patch_st
-  with_items: "{{ oneoff_patches[oracle_version]|default([]) }}"
-  when: "{{ oneoff_patches[oracle_version] }} is defined"
+  with_items: "{{ oneoff_patches[oracle_version] | default([]) }}"
+  when: oneoff_patches[oracle_version] is defined
 
 - name: Fail if missing one-off patches
   fail: msg="Oops! Missing one-off patch {{ item.item.filename }}"

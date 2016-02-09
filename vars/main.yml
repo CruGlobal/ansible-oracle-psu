@@ -53,23 +53,26 @@ oneoff_patches:
   12.1.0.2:
     - patchid: 21091518
       filename: p21091518_121020_Linux-x86-64.zip
-    # - patchid: 21800251 # only needed up to version 12.1.0.2.4
-    #   filename: p21800251_121020_Linux-x86-64.zip
+    # from	Things to Consider to Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
     - patchid: 20879889
       filename: p20879889_121020_Linux-x86-64.zip
-    # - patchid: 21821738 #Merge request for bugs 21821738 18485835
-    #   filename: p21821738_121020_Linux-x86-64.zip
 
 #PSU version specific patches
-  12.1.0.2.4:
-    - patchid: 13542050   #from MOS Note https://support.oracle.com/epmos/faces/DocContentDisplay?_afrLoop=383616185962642&id=2034610.1
-      filename: p13542050_121024_Linux-x86-64.zip
-
   12.1.0.2.5:
     - patchid: 13542050   #from MOS Note https://support.oracle.com/epmos/faces/DocContentDisplay?_afrLoop=383616185962642&id=2034610.1
       filename: p13542050_121024_Linux-x86-64.zip
     - patchid: 20807398
       filename: p20807398_121025_Linux-x86-64.zip
+    - patchid: 21869620 #Merge request for bugs 19509982 20807398
+      filename: p21869620_121025_Linux-x86-64.zip
+      
+  12.1.0.2.4:
+    - patchid: 13542050   #from MOS Note https://support.oracle.com/epmos/faces/DocContentDisplay?_afrLoop=383616185962642&id=2034610.1
+      filename: p13542050_121024_Linux-x86-64.zip
+    - patchid: 21800251 # only needed up to version 12.1.0.2.4
+      filename: p21800251_121020_Linux-x86-64.zip
+    - patchid: 21821738 #Merge request for bugs 21821738 18485835
+      filename: p21821738_121020_Linux-x86-64.zip
 
   11.2.0.4.8:
     - patchid: 17890099 # ORA-2072 AND ORA-2063 ON QUERY VIA DBLINK
