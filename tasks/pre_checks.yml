@@ -8,7 +8,6 @@
     - oracle_install_type
     - oracle_version
 
-
 - name: fail if PSU zip file is missing
   stat:
     path: "{{ oracle_stage_install }}/{{ psu[oracle_version][psu_name][oracle_install_type].filename }}"
@@ -17,21 +16,6 @@
 - name: Fail if PSU file is missing
   fail: msg="Oops! The PSU zip file is missing."
   when: not psu_st.stat.exists
-
-
-- name: fail if one-off patches are missing
-  stat:
-    path: "{{ oracle_stage_install }}/{{ item.filename }}"
-  register: patch_st
-  with_items: "{{ oneoff_patches[oracle_version] | default([]) }}"
-  when: oneoff_patches[oracle_version] is defined
-
-- name: Fail if missing one-off patches
-  fail: msg="Oops! Missing one-off patch {{ item.item.filename }}"
-  with_items: "{{ patch_st.results }}"
-  when:
-    - oneoff_patches[oracle_version] is defined
-    - not item.stat.exists
 
 - name: fail if PSU-Specific one-off patches are missing
   stat:

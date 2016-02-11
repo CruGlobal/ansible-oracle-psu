@@ -18,18 +18,6 @@
     group: "{{ oracle_group }}"
   run_once: true
 
-- name: Unzip oneoff patches
-  unarchive:
-    src: "{{ oracle_stage_install }}/{{ item.filename }}"
-    dest: "{{ patch_directory }}/"
-    copy: no
-    creates: "{{ patch_directory }}/{{ item.patchid }}/README.txt"
-    owner: "{{ oracle_user }}"
-    group: "{{ oracle_group }}"
-  with_items: "{{ oneoff_patches[oracle_version]|default([]) }}"
-  when: oneoff_patches[oracle_version] is defined
-  run_once: true
-
 - name: Unzip oneoff patches (PSU version specific)
   unarchive:
     src: "{{ oracle_stage_install }}/{{ item.filename }}"
