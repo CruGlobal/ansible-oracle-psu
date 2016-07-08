@@ -10,7 +10,8 @@
     group: "{{ oracle_group }}"
 
 - name: SI | check for conflicts
-  shell: "{{ oracle_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
+  shell: "opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
+  environment: "{{ env }}"
   register: opatch_conflicts
 
 - debug: var=opatch_conflicts.stdout_lines
@@ -20,15 +21,13 @@
   register: dblist
   tags: datapatch
 
-- debug: var=env
-
 - name: SI | shutdown databases running in oracle_home
-  shell: export ORACLE_SID={{ item }}; echo "shutdown immediate;" | {{ oracle_home }}/bin/sqlplus / as sysdba
+  shell: export ORACLE_SID={{ item }}; echo "shutdown immediate;" | sqlplus / as sysdba
   environment: "{{ env }}"
-  with_items: dblist.stdout_lines
+  with_items: "{{ dblist.stdout_lines }}"
 
 - name: SI | shutdown listener in oracle_home
-  shell: "{{ oracle_home }}/bin/lsnrctl stop listener"
+  shell: "lsnrctl stop listener"
   environment: "{{ env }}"
   when: shutdown_listener | default(false)
   ignore_errors: true
@@ -44,14 +43,14 @@
   include: oneoff_apply.yml
 
 - name: SI | startup databases
-  shell: export ORACLE_SID={{ item }}; echo "startup;" | {{ oracle_home }}/bin/sqlplus / as sysdba
+  shell: export ORACLE_SID={{ item }}; echo "startup;" | sqlplus / as sysdba
   environment: "{{ env }}"
-  with_items: dblist.stdout_lines
+  with_items: "{{ dblist.stdout_lines }}"
 
 - name: SI | 12.1 - startup pluggable databases
-  shell: export ORACLE_SID={{ item }}; echo "alter pluggable database all open;" | {{ oracle_home }}/bin/sqlplus / as sysdba
+  shell: export ORACLE_SID={{ item }}; echo "alter pluggable database all open;" | sqlplus / as sysdba
   environment: "{{ env }}"
-  with_items: dblist.stdout_lines
+  with_items: "{{ dblist.stdout_lines }}"
   when: oracle_version == '12.1.0.2'
 
 - name: Run Catbundle.sql
@@ -59,13 +58,14 @@
   tags: catbundle
 
 - name: SI | startup listener in oracle_home
-  shell: "{{ oracle_home }}/bin/lsnrctl start listener"
+  shell: "lsnrctl start listener"
   environment: "{{ env }}"
   when: shutdown_listener | default(false)
   ignore_errors: true
 
 - name: Check opatch lsinventory (DB)
-  shell: "{{ oracle_home }}/OPatch/opatch lsinventory"
+  shell: "opatch lsinventory"
+  environment: "{{ env }}"
   register: opatchls
 
 - debug: var=opatchls.stdout_lines

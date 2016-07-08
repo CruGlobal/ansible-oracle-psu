@@ -3,8 +3,7 @@
 
 - name: RAC | get list of database names on host
   shell: srvctl config database
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   register: dblist
   tags: catbundle
@@ -34,8 +33,7 @@
 
 - name: RAC | Opatch lsinventory
   shell: "{{ item }}/OPatch/opatch lsinventory -oh {{ item }}"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become_user: "{{ oracle_user }}"
   with_items:
     - "{{ oracle_home }}"
     - "{{ grid_home|default(omit) }}"
@@ -45,8 +43,7 @@
 
 - name: RAC | Check PSU for conflicts
   shell: "{{ item }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become_user: "{{ oracle_user }}"
   register: opatch_conflicts
   with_items:
     - "{{ oracle_home }}"
@@ -54,14 +51,12 @@
 
 - name: RAC | Apply patch to first node
   shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
-  sudo: yes
-  sudo_user: root
+  become_user: root
   when: master_node
 
 - name: RAC | Shutdown Oracle Home on first node
   shell: srvctl stop home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }} -f
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   when: master_node
 
@@ -71,15 +66,13 @@
 
 - name: RAC | Startup Oracle Home on first node
   shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   when: master_node
 
 - name: RAC | Check if stuff is running
   shell: "{{ grid_home }}/bin/crsctl stat res -t"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become_user: "{{ oracle_user }}"
   when: master_node
   register: stat_res_t
 
@@ -90,13 +83,12 @@
 
 - name: RAC | Apply patch to second node
   shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
-  sudo_user: root
+  become_user: root
   when: not master_node
 
 - name: RAC | Shutdown Oracle Home on second node
   shell: srvctl stop home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }} -f
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   when: not master_node
 
@@ -106,8 +98,7 @@
 
 - name: RAC | Startup Oracle Home on second node
   shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   when: not master_node
 
@@ -117,8 +108,7 @@
 
 - name: RAC | Opatch lsinventory
   shell: "{{ item }}/OPatch/opatch lsinventory -oh {{ item }}"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become_user: "{{ oracle_user }}"
   with_items:
     - "{{ oracle_home }}"
     - "{{ grid_home|default(omit) }}"
