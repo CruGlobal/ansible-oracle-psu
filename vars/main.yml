@@ -1,8 +1,21 @@
 ---
+env:
+  ORACLE_HOME: "{{ oracle_home }}"
+  ORACLE_BASE: "{{ oracle_base }}"
+  TNS_ADMIN: "{{ tns_admin }}"
+  PATH: "{{ oracle_home }}/bin:{{ oracle_home }}/OPatch:$PATH:/bin:/usr/bin::/usr/ccs/bin"
 
 # PSU information for RAC and Single Instance (11.2 and 12.1)
 psu:
   12.1.0.2:
+    APR2016:
+      patchversion: 12.1.0.2.160419
+      rac:
+        filename: p22646084_121020_Linux-x86-64.zip
+        patchid: 22646084
+      si:
+        filename: p22291127_121020_Linux-x86-64.zip
+        patchid: 22291127
     JAN2016:
       patchversion: 12.1.0.2.160119
       rac:
@@ -29,6 +42,22 @@ psu:
         patchid: 20831110
 
   11.2.0.4:
+    APR2016:
+      patchversion: 11.2.0.4.160419
+      rac:
+        filename: p22646198_112040_Linux-x86-64.zip
+        patchid: 22646198
+      si:
+        filename: p22502456_112040_Linux-x86-64.zip
+        patchid: 22502456
+    JAN2016:
+      patchversion: 11.2.0.4.160119
+      rac:
+        filename: p22191577_112040_Linux-x86-64.zip
+        patchid: 22191577
+      si:
+        filename: p21948347_112040_Linux-x86-64.zip
+        patchid: 21948347
     OCT2015:
       patchversion: 11.2.0.4.8
       rac:
@@ -50,7 +79,7 @@ psu:
 # Files should exist in path defined by oracle_stage_install.
 opatch:
   12.1.0.2:
-    version: 12.1.0.1.10
+    version: 12.1.0.1.12
     filename: p6880880_121010_Linux-x86-64.zip
   11.2.0.4:
     version: 11.2.0.3.12
@@ -65,6 +94,15 @@ oneoff_patches:
     #   filename: p20879889_121020_Linux-x86-64.zip
 
 #PSU version specific patches
+  12.1.0.2.160419:
+    - patchid: 21091518   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
+      filename: p21091518_121020_Linux-x86-64.zip
+    - patchid: 20807398   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
+      filename: p20807398_12102160419_Linux-x86-64.zip
+    - patchid: 19509982   # DISABLE FIX FOR RAISING ORA-1792 BY DEFAULT
+      filename: p19509982_12102160419_Linux-x86-64.zip
+
+
   12.1.0.2.160119:
     - patchid: 21091518   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
       filename: p21091518_121020_Linux-x86-64.zip
@@ -74,6 +112,8 @@ oneoff_patches:
       filename: p13542050_121024_Linux-x86-64.zip
     - patchid: 21869620   # Merge request for bugs 19509982 20807398
       filename: p21869620_121025_Linux-x86-64.zip
+    - patchid: 22965605   # MERGE REQUEST ON TOP OF DATABASE PSU 12.1.0.2.5 FOR BUGS 21869620 18302923
+      filename: p22965605_121025_Linux-x86-64.zip
 
 
   12.1.0.2.5:
