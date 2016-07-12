@@ -15,85 +15,85 @@ opatch:
     version: 11.2.0.3.12
     filename: p6880880_112000_Linux-x86-64.zip
 
+quarterly_patches:
+  # Database Proactive Patch (only for 12.1 and later)
+  dbbp:
+    12.1.0.2:
+      APR2016:
+        patchversion: 12.1.0.2.160419
+        filename: p22899531_121020_Linux-x86-64.zip
+        patchid: 22899531
+        si_patchid: 22806133
 
-# Database Proactive Patch (only for 12.1 and later)
-dbbp:
-  12.1.0.2:
-    APR2016:
-      patchversion: 12.1.0.2.160419
-      filename: p22899531_121020_Linux-x86-64.zip
-      patchid: 22899531
-      si_patchid: 22806133
+  # PSU information for RAC and Single Instance (11.2 and 12.1)
+  psu:
+    12.1.0.2:
+      APR2016:
+        patchversion: 12.1.0.2.160419
+        rac:
+          filename: p22646084_121020_Linux-x86-64.zip
+          patchid: 22646084
+        si:
+          filename: p22291127_121020_Linux-x86-64.zip
+          patchid: 22291127
+      JAN2016:
+        patchversion: 12.1.0.2.160119
+        rac:
+          filename: p22191349_121020_Linux-x86-64.zip
+          patchid: 22191349
+        si:
+          filename: p21948354_121020_Linux-x86-64.zip
+          patchid: 21948354
+      OCT2015:
+        patchversion: 12.1.0.2.5
+        rac:
+          filename: p21523234_121020_Linux-x86-64.zip
+          patchid: 21523234
+        si:
+          filename: p21359755_121020_Linux-x86-64.zip
+          patchid: 21359755
+      JUL2015:
+        patchversion: 12.1.0.2.4
+        rac:
+          filename: p20996835_121020_Linux-x86-64.zip
+          patchid: 20996835
+        si:
+          filename: p20831110_121020_Linux-x86-64.zip
+          patchid: 20831110
 
-# PSU information for RAC and Single Instance (11.2 and 12.1)
-psu:
-  12.1.0.2:
-    APR2016:
-      patchversion: 12.1.0.2.160419
-      rac:
-        filename: p22646084_121020_Linux-x86-64.zip
-        patchid: 22646084
-      si:
-        filename: p22291127_121020_Linux-x86-64.zip
-        patchid: 22291127
-    JAN2016:
-      patchversion: 12.1.0.2.160119
-      rac:
-        filename: p22191349_121020_Linux-x86-64.zip
-        patchid: 22191349
-      si:
-        filename: p21948354_121020_Linux-x86-64.zip
-        patchid: 21948354
-    OCT2015:
-      patchversion: 12.1.0.2.5
-      rac:
-        filename: p21523234_121020_Linux-x86-64.zip
-        patchid: 21523234
-      si:
-        filename: p21359755_121020_Linux-x86-64.zip
-        patchid: 21359755
-    JUL2015:
-      patchversion: 12.1.0.2.4
-      rac:
-        filename: p20996835_121020_Linux-x86-64.zip
-        patchid: 20996835
-      si:
-        filename: p20831110_121020_Linux-x86-64.zip
-        patchid: 20831110
-
-  11.2.0.4:
-    APR2016:
-      patchversion: 11.2.0.4.160419
-      rac:
-        filename: p22646198_112040_Linux-x86-64.zip
-        patchid: 22646198
-      si:
-        filename: p22502456_112040_Linux-x86-64.zip
-        patchid: 22502456
-    JAN2016:
-      patchversion: 11.2.0.4.160119
-      rac:
-        filename: p22191577_112040_Linux-x86-64.zip
-        patchid: 22191577
-      si:
-        filename: p21948347_112040_Linux-x86-64.zip
-        patchid: 21948347
-    OCT2015:
-      patchversion: 11.2.0.4.8
-      rac:
-        filename: p21523375_112040_Linux-x86-64.zip
-        patchid: 21523375
-      si:
-        filename: p21352635_112040_Linux-x86-64.zip
-        patchid: 21352635
-    JUL2015:
-      patchversion: 11.2.0.4.7
-      rac:
-        filename: p20996923_112040_Linux-x86-64.zip
-        patchid: 20996923
-      si:
-        filename: p20760982_112040_Linux-x86-64.zip
-        patchid: 20760982
+    11.2.0.4:
+      APR2016:
+        patchversion: 11.2.0.4.160419
+        rac:
+          filename: p22646198_112040_Linux-x86-64.zip
+          patchid: 22646198
+        si:
+          filename: p22502456_112040_Linux-x86-64.zip
+          patchid: 22502456
+      JAN2016:
+        patchversion: 11.2.0.4.160119
+        rac:
+          filename: p22191577_112040_Linux-x86-64.zip
+          patchid: 22191577
+        si:
+          filename: p21948347_112040_Linux-x86-64.zip
+          patchid: 21948347
+      OCT2015:
+        patchversion: 11.2.0.4.8
+        rac:
+          filename: p21523375_112040_Linux-x86-64.zip
+          patchid: 21523375
+        si:
+          filename: p21352635_112040_Linux-x86-64.zip
+          patchid: 21352635
+      JUL2015:
+        patchversion: 11.2.0.4.7
+        rac:
+          filename: p20996923_112040_Linux-x86-64.zip
+          patchid: 20996923
+        si:
+          filename: p20760982_112040_Linux-x86-64.zip
+          patchid: 20760982
 
 
 

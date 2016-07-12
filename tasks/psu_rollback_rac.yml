@@ -28,7 +28,7 @@
   when: master_node
 
 - name: RAC | Rollback PSU
-  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -rollback -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -rollback -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   become_user: root
   register: rac_psu_rollback
   when: master_node
@@ -60,7 +60,7 @@
   when: not master_node
 
 - name: RAC | Rollback PSU on second node
-  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -rollback -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -rollback -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   become_user: root
   register: rac_psu_rollback
   when: not master_node

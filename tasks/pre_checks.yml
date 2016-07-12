@@ -7,35 +7,39 @@
   with_items:
     - oracle_install_type
     - oracle_version
+    - patch_type
+    - patch_name
 
 - name: Check for PSU zip file
   stat:
-    path: "{{ oracle_stage_install }}/{{ psu[oracle_version][psu_name][oracle_install_type].filename }}"
-  register: psu_st
+    path: "{{ oracle_stage_install }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].filename }}"
+  register: patch_st
+  when: "'{{ patch_type }}' == 'psu'"
+  failed_when: "not {{ patch_st.stat.exists }}"
 
-- name: Fail if PSU file is missing
-  fail: msg="Oops! The PSU zip file is missing."
-  when: "not {{ psu_st.stat.exists }}"
-
-# - name: fail if PSU-Specific one-off patches are missing
-#   stat:
-#     path: "{{ oracle_stage_install }}/{{ item.filename }}"
-#   register: patch_st
-#   with_items: oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([])
-#   when: "{{ oneoff_patches[ psu[oracle_version][psu_name].patchversion ] }} is defined"
-
-# - name: Fail if missing PSU-Specific one-off patches
-#   fail: msg="Oops! Missing one-off patch {{ item.item.filename }}"
-#   with_items: patch_st.results
-#   when:
-#     - "{{ oneoff_patches[ psu[oracle_version][psu_name].patchversion ] }} is defined"
-#     - "not {{ item.stat.exists }}"
+- name: Check for DBBP zip file
+  stat:
+    path: "{{ oracle_stage_install }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].filename }}"
+  register: patch_st
+  when: "'{{ patch_type }}' == 'dbbp'"
+  failed_when: "not {{ patch_st.stat.exists }}"
 
 - name: Check if OPatch zip file exists
   stat:
     path: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
   register: opatch_st
+  failed_when: "not {{ opatch_st.stat.exists }}"
 
-- name: Fail if Opatch zip file is missing
-  fail: msg="Oops! Opatch zip file is missing."
-  when: "not {{ opatch_st.stat.exists }}"
+# - name: fail if PSU-Specific one-off patches are missing
+#   stat:
+#     path: "{{ oracle_stage_install }}/{{ item.filename }}"
+#   register: patch_st
+#   with_items: oneoff_patches[ psu[oracle_version][patch_name].patchversion ]|default([])
+#   when: "{{ oneoff_patches[ psu[oracle_version][patch_name].patchversion ] }} is defined"
+
+# - name: Fail if missing PSU-Specific one-off patches
+#   fail: msg="Oops! Missing one-off patch {{ item.item.filename }}"
+#   with_items: patch_st.results
+#   when:
+#     - "{{ oneoff_patches[ psu[oracle_version][patch_name].patchversion ] }} is defined"
+#     - "not {{ item.stat.exists }}"

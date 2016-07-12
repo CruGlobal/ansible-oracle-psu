@@ -10,10 +10,10 @@
 
 - name: Unzip PSU
   unarchive:
-    src: "{{ oracle_stage_install }}/{{ psu[oracle_version][psu_name][oracle_install_type].filename }}"
+    src: "{{ oracle_stage_install }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].filename }}"
     dest: "{{ patch_directory}}/"
     copy: no
-    creates: "{{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}/README.txt"
+    creates: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }}/README.txt"
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
   run_once: true
@@ -26,6 +26,6 @@
     creates: "{{ patch_directory }}/{{ item.patchid }}/README.txt"
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
-  with_items: "{{ oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([]) }}"
-  when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
+  with_items: "{{ oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ]|default([]) }}"
+  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
   run_once: true

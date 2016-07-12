@@ -42,7 +42,7 @@
 - debug: var=lsinv_pre.results
 
 - name: RAC | Check PSU for conflicts
-  shell: "{{ item }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }}"
+  shell: "{{ item }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }}"
   become_user: "{{ oracle_user }}"
   register: opatch_conflicts
   with_items:
@@ -50,7 +50,7 @@
     - "{{ grid_home|default(omit) }}"
 
 - name: RAC | Apply patch to first node
-  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   become_user: root
   when: master_node
 
@@ -82,7 +82,7 @@
   pause: prompt="Verify everything's running on the first node."
 
 - name: RAC | Apply patch to second node
-  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ psu[oracle_version][psu_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   become_user: root
   when: not master_node
 
