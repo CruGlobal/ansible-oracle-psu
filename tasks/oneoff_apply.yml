@@ -1,20 +1,38 @@
 ---
-#Apply PSU version specific one-off patches
-- name: PSU Version Specific Oneoff conflict check
-  shell: "{{ oracle_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ item.patchid }}"
+#Apply PSU one-off patches
+- name: Template patch list
+  template:
+    src: patch_list.j2
+    dest: "{{ oracle_stage_base }}/patch_list_{{ oracle_version }}_{{ psu_name }}.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: Opatch prereq check for oneoff patches
+  shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ oracle_stage_base }}/patch_list_{{ oracle_version }}_{{ psu_name }}.txt
+  environment: "{{ env }}"
   become_user: "{{ oracle_user }}"
-  with_items: "{{ oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([]) }}"
-  when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
   register: oneoff_conflicts_psu
 
 - debug: var=oneoff_conflicts_psu.results
 
 - name: Apply PSU Version Specific one-off patches
-  shell: "opatch apply -silent -local -force -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ patch_directory }}/{{ item.patchid }}"
-  become_user: "{{ oracle_user }}"
+  shell: opatch napply -silent -skip_subset -skip_duplicate -ocmrf {{ oracle_stage_install }}/ocm.rsp -phBaseFile {{ oracle_stage_base }}/patch_list_{{ oracle_version }}_{{ psu_name }}.txt
   environment: "{{ env }}"
-  with_items: "{{oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([]) }}"
-  when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
+  become_user: "{{ oracle_user }}"
   register: oneoff_apply_psu
 
 - debug: var=oneoff_apply_psu.results
+
+# - name: PSU Version Specific Oneoff conflict check
+#   shell: "{{ oracle_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ item.patchid }}"
+#   become_user: "{{ oracle_user }}"
+#   with_items: "{{ oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([]) }}"
+#   when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
+#
+#
+# - name: Apply PSU Version Specific one-off patches
+#   shell: "opatch apply -silent -local -force -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ patch_directory }}/{{ item.patchid }}"
+#   become_user: "{{ oracle_user }}"
+#   environment: "{{ env }}"
+#   with_items: "{{oneoff_patches[ psu[oracle_version][psu_name].patchversion ]|default([]) }}"
+#   when: oneoff_patches[ psu[oracle_version][psu_name].patchversion ] is defined
