@@ -9,6 +9,8 @@ oracle_base: /app/oracle
 tns_admin: "{{ oracle_home }}/network/admin"
 
 oracle_stage_install: /u01/stage
+oracle_stage_base: /home/oracle/ansible_stage
+
 patch_directory: "{{ oracle_stage_install }}/{{ oracle_version }}/{{ psu_name }}"
 
 env:
