@@ -1,0 +1,92 @@
+---
+# Apply DBBP patch on single instance db home.
+
+- name: DBBP SI | update opatch
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
+    dest: "{{ oracle_home }}"
+    copy: no
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: DBBP SI | Get list of patches in DBBP
+  find:
+    path: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
+    file_type: directory
+    patterns: '^\d{8}'
+    use_regex: true
+  register: dbbp_patches
+
+- name: DBBP SI | Template patch list
+  template:
+    src: dbbp_patch_list.j2
+    dest: "{{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ psu_name }}.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: DBBP SI | check for conflicts
+  shell: "opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ psu_name }}.txt"
+  environment: "{{ env }}"
+  register: opatch_conflicts
+  with_items:
+    - CheckConflictAgainstOHWithDetail
+    - CheckSystemSpace
+
+- debug: var=opatch_conflicts
+
+- name: DBBP SI | get list of database names on host
+  shell: cat /etc/oratab|grep {{ oracle_home }}|egrep ':N|:Y'|grep -v \*|cut -f1 -d':'
+  register: dblist
+  tags: datapatch
+
+- name: DBBP SI | shutdown databases running in oracle_home
+  shell: export ORACLE_SID={{ item }}; echo "shutdown immediate;" | sqlplus / as sysdba
+  environment: "{{ env }}"
+  with_items: "{{ dblist.stdout_lines }}"
+
+- name: DBBP SI | shutdown listener in oracle_home
+  shell: "lsnrctl stop listener"
+  environment: "{{ env }}"
+  when: shutdown_listener | default(false)
+  ignore_errors: true
+
+- name: DBBP SI | opatch apply
+  shell: "opatch apply -silent -force -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  environment: "{{ env }}"
+  args:
+    chdir: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].si_patchid }}"
+  register: opatch_apply
+
+- debug: var=opatch_apply.stdout_lines
+
+- name: DBBP SI | apply oneoff patches
+  include: oneoff_apply.yml
+  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+- name: DBBP SI | startup databases
+  shell: export ORACLE_SID={{ item }}; echo "startup;" | sqlplus / as sysdba
+  environment: "{{ env }}"
+  with_items: "{{ dblist.stdout_lines }}"
+
+- name: DBBP SI | 12.1 - startup pluggable databases
+  shell: export ORACLE_SID={{ item }}; echo "alter pluggable database all open;" | sqlplus / as sysdba
+  environment: "{{ env }}"
+  with_items: "{{ dblist.stdout_lines }}"
+  when: oracle_version == '12.1.0.2'
+
+- name: DBBP SI | Run Catbundle.sql
+  include: run_catbundle.yml
+  tags: catbundle
+
+- name: DBBP SI | startup listener in oracle_home
+  shell: "lsnrctl start listener"
+  environment: "{{ env }}"
+  when: shutdown_listener | default(false)
+  ignore_errors: true
+
+- name: DBBP SI | Check opatch lsinventory (DB)
+  shell: "opatch lsinventory"
+  environment: "{{ env }}"
+  register: opatchls
+
+- debug: var=opatchls.stdout_lines

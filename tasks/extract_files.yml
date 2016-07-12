@@ -17,8 +17,20 @@
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
   run_once: true
+  when: "'{{ patch_type }}' == 'psu'"
 
-- name: Unzip oneoff patches (PSU version specific)
+- name: Unzip DBBP
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].filename }}"
+    dest: "{{ patch_directory}}/"
+    copy: no
+    creates: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}/README.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  run_once: true
+  when: "'{{ patch_type }}' == 'dbbp'"
+
+- name: Unzip oneoff patches
   unarchive:
     src: "{{ oracle_stage_install }}/{{ item.filename }}"
     dest: "{{ patch_directory }}/"

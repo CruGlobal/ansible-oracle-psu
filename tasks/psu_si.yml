@@ -41,7 +41,7 @@
 
 - name: SI | apply oneoff patches
   include: oneoff_apply.yml
-  when: oneoff_patches[ psu[oracle_version][patch_name].patchversion ] is defined
+  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
 
 - name: SI | startup databases
   shell: export ORACLE_SID={{ item }}; echo "startup;" | sqlplus / as sysdba
