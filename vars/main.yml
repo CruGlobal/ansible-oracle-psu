@@ -5,6 +5,26 @@ env:
   TNS_ADMIN: "{{ tns_admin }}"
   PATH: "{{ oracle_home }}/bin:{{ oracle_home }}/OPatch:$PATH:/bin:/usr/bin::/usr/ccs/bin"
 
+# Latest opatch versions and files.
+# Files should exist in path defined by oracle_stage_install.
+opatch:
+  12.1.0.2:
+    version: 12.1.0.1.12
+    filename: p6880880_121010_Linux-x86-64.zip
+  11.2.0.4:
+    version: 11.2.0.3.12
+    filename: p6880880_112000_Linux-x86-64.zip
+
+
+# Database Proactive Patch (only for 12.1 and later)
+dbbp:
+  12.1.0.2:
+    APR2016:
+      patchversion: 12.1.0.2.160419
+      filename: p22899531_121020_Linux-x86-64.zip
+      patchid: 22899531
+      si_patchid: 22806133
+
 # PSU information for RAC and Single Instance (11.2 and 12.1)
 psu:
   12.1.0.2:
@@ -75,15 +95,7 @@ psu:
         filename: p20760982_112040_Linux-x86-64.zip
         patchid: 20760982
 
-# Latest opatch versions and files.
-# Files should exist in path defined by oracle_stage_install.
-opatch:
-  12.1.0.2:
-    version: 12.1.0.1.12
-    filename: p6880880_121010_Linux-x86-64.zip
-  11.2.0.4:
-    version: 11.2.0.3.12
-    filename: p6880880_112000_Linux-x86-64.zip
+
 
 
 oneoff_patches:
