@@ -19,6 +19,11 @@ quarterly_patches:
   # Database Proactive Patch (only for 12.1 and later)
   dbbp:
     12.1.0.2:
+      JUL2016:
+        patchversion: 12.1.0.2.160719
+        filename: p23273686_121020_Linux-x86-64.zip
+        patchid: 23273686
+        si_patchid: 23144544
       APR2016:
         patchversion: 12.1.0.2.160419
         filename: p22899531_121020_Linux-x86-64.zip
@@ -28,6 +33,14 @@ quarterly_patches:
   # PSU information for RAC and Single Instance (11.2 and 12.1)
   psu:
     12.1.0.2:
+      JUL2016:
+        patchversion: 12.1.0.2.160719
+        rac:
+          filename: p23273629_121020_Linux-x86-64.zip
+          patchid: 23273629
+        si:
+          filename: p23054246_121020_Linux-x86-64.zip
+          patchid: 23054246
       APR2016:
         patchversion: 12.1.0.2.160419
         rac:
@@ -62,6 +75,14 @@ quarterly_patches:
           patchid: 20831110
 
     11.2.0.4:
+      JUL2016:
+        patchversion: 11.2.0.4.160719
+        rac:
+          filename: p23274134_112040_Linux-x86-64.zip
+          patchid: 23274134
+        si:
+          filename: p23054359_112040_Linux-x86-64.zip
+          patchid: 23054359
       APR2016:
         patchversion: 11.2.0.4.160419
         rac:

@@ -23,22 +23,22 @@
   become_user: "{{ oracle_user }}"
   when: not rollback_psu
 
-# #Rollback PSU by defining variable: rollback_psu: true when calling this role
-# - name: Rollback PSU on Single Instance Database Home
-#   include: psu_rollback_si.yml
-#   become_user: "{{ oracle_user }}"
-#   when: oracle_install_type == 'si' and rollback_psu
-#   tags: rollback_si
-#
-# - name: Rollback PSU on RAC cluster
-#   include: psu_rollback_rac.yml
-#   become_user: "{{ oracle_user }}"
-#   when: oracle_install_type == 'rac' and rollback_psu
-#   tags: rollback_rac
-#
-# - name: Start EM Agent
-#   shell: "{{ agent_home }}/bin/emctl start agent"
-#   become: yes
-#   become_user: "{{ oracle_user }}"
-#   when: agent_home is defined and shutdown_listener
-#   tags: start_agent
+#Rollback PSU by defining variable: rollback_psu: true when calling this role
+- name: Rollback PSU on Single Instance Database Home
+  include: psu_rollback_si.yml
+  become_user: "{{ oracle_user }}"
+  when: oracle_install_type == 'si' and rollback_psu
+  tags: rollback_si
+
+- name: Rollback PSU on RAC cluster
+  include: psu_rollback_rac.yml
+  become_user: "{{ oracle_user }}"
+  when: oracle_install_type == 'rac' and rollback_psu
+  tags: rollback_rac
+
+- name: Start EM Agent
+  shell: "{{ agent_home }}/bin/emctl start agent"
+  become: yes
+  become_user: "{{ oracle_user }}"
+  when: agent_home is defined and shutdown_listener
+  tags: start_agent

@@ -1,3 +1,3 @@
-{% for item in oneoff_patches[ quarterly_patches[patch_type][oracle_version][psu_name].patchversion ] %}
+{% for item in oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] %}
 {{ patch_directory }}/{{ item.patchid }}
 {% endfor %}

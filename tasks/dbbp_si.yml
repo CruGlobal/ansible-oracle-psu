@@ -20,12 +20,12 @@
 - name: DBBP SI | Template patch list
   template:
     src: dbbp_patch_list.j2
-    dest: "{{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ psu_name }}.txt"
+    dest: "{{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
 
 - name: DBBP SI | check for conflicts
-  shell: "opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ psu_name }}.txt"
+  shell: "opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
   environment: "{{ env }}"
   register: opatch_conflicts
   with_items:

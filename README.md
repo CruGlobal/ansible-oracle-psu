@@ -15,7 +15,7 @@ Ansible role to apply Oracle quarterly patches (PSU) to single instance (SI) and
 
 ### defaults/main.yml
 
-* psu_name: July2015  # Should match psu dictionary variable defined in vars/main.yml
+* patch_name: July2015  # Should match quarterly_patches dictionary variable defined in vars/main.yml
 * shutdown_listener: true # set to false if patching an empty oracle home (ie new 12c install)
 * rollback_psu: false # set to true if rolling back current PSU.
 
