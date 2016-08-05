@@ -127,13 +127,11 @@ oneoff_patches:
     #   filename: p20879889_121020_Linux-x86-64.zip
 
 #PSU version specific patches
-  12.1.0.2.160419:
-    - patchid: 21091518   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-      filename: p21091518_121020_Linux-x86-64.zip
-    - patchid: 20807398   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-      filename: p20807398_12102160419_Linux-x86-64.zip
-    - patchid: 19509982   # DISABLE FIX FOR RAISING ORA-1792 BY DEFAULT
-      filename: p19509982_12102160419_Linux-x86-64.zip
+  # 12.1.0.2.160419: 
+    # - patchid: 21091518   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
+    #   filename: p21091518_121020_Linux-x86-64.zip
+    # - patchid: 20807398   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
+    #   filename: p20807398_12102160419_Linux-x86-64.zip
 
 
   12.1.0.2.160119:
