@@ -28,18 +28,19 @@
   when: master_node
 
 - name: RAC | Rollback PSU
-  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -rollback -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatchauto rollback {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   become_user: root
   register: rac_psu_rollback
   when: master_node
 
 - debug: var=rac_psu_rollback.stdout_lines
 
-- name: RAC | Startup Oracle Home on first node
+- name: Startup Oracle Home on first node
   shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
   become_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   when: master_node
+  ignore_errors: true
 
 - name: RAC | Check if stuff is running
   shell: "{{ grid_home }}/bin/crsctl stat res -t"
@@ -60,16 +61,17 @@
   when: not master_node
 
 - name: RAC | Rollback PSU on second node
-  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -rollback -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatchauto rollback {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   become_user: root
   register: rac_psu_rollback
   when: not master_node
 
-- name: RAC | Startup Oracle Home on first node
+- name: RAC | Startup Oracle Home on second node
   shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
   become_user: "{{ oracle_user }}"
   environment: "{{ env }}"
   when: not master_node
+  ignore_errors: true
 
 - name: RAC | Check if stuff is running
   shell: "{{ grid_home }}/bin/crsctl stat res -t"

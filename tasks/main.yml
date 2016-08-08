@@ -10,6 +10,7 @@
 
 - name: Extract PSU and One-off patches
   include: extract_files.yml
+  when: not rollback_psu
   tags: extract_files
 
 - name: Stop EM Agent
