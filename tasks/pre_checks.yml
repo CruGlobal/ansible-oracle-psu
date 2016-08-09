@@ -13,6 +13,8 @@
 - name: Check for PSU zip file
   stat:
     path: "{{ oracle_stage_install }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].filename }}"
+    get_checksum: false
+    get_md5: false
   register: patch_st
   when: "'{{ patch_type }}' == 'psu'"
   failed_when: "not {{ patch_st.stat.exists }}"
@@ -20,6 +22,8 @@
 - name: Check for DBBP zip file
   stat:
     path: "{{ oracle_stage_install }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].filename }}"
+    get_checksum: false
+    get_md5: false
   register: patch_st
   when: "'{{ patch_type }}' == 'dbbp'"
   failed_when: "not {{ patch_st.stat.exists }}"

@@ -35,7 +35,7 @@
 
 - debug: var=rac_psu_rollback.stdout_lines
 
-- name: Startup Oracle Home on first node
+- name: RAC ROLLBACK | Startup Oracle Home on first node
   shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
   become_user: "{{ oracle_user }}"
   environment: "{{ env }}"

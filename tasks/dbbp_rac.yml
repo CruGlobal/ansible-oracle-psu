@@ -1,1 +1,147 @@
 ---
+# dbbp apply steps for RAC cluster
+
+- name: DBBP RAC | get list of database names on host
+  shell: srvctl config database | sed 's/$/:/'
+  become_user: "{{ oracle_user }}"
+  environment: "{{ env }}"
+  register: all_databases
+  tags: catbundle
+
+- debug: var=all_databases.stdout_lines
+
+- name: DBBP SI | Get list of databases running in 'oracle_home'
+  shell: cat /etc/oratab | grep '{{ all_databases.stdout_lines | join('\|') }}' | grep {{ oracle_home }} | egrep ':N|:Y'|grep -v \*|cut -f1 -d':'
+  register: dblist
+  tags: datapatch
+
+- debug: var=dblist
+
+- name: DBBP RAC | Generate srvctl state file
+  template:
+    src: srvctl_state.j2
+    dest: "{{ oracle_home }}/srvm/admin/psu_state.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: DBBP RAC | delete srvctl state file if it exists
+  file: path={{ oracle_home }}/srvm/admin/oneoffstop.txt state=absent
+
+- name: DBBP RAC | Update opatch
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
+    dest: "{{ item }}"
+    copy: no
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  with_items:
+    - "{{ oracle_home }}"
+    - "{{ grid_home|default(omit) }}"
+
+- name: DBBP RAC | Opatch lsinventory
+  shell: "{{ item }}/OPatch/opatch lsinventory -oh {{ item }}"
+  become_user: "{{ oracle_user }}"
+  with_items:
+    - "{{ oracle_home }}"
+    - "{{ grid_home|default(omit) }}"
+  register: lsinv_pre
+
+- debug: var=lsinv_pre.results
+
+- name: DBBP RAC | Get list of patches in DBBP
+  find:
+    path: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
+    file_type: directory
+    patterns: '^\d{8}'
+    use_regex: true
+  register: dbbp_patches
+
+- name: DBBP RAC | Template patch list
+  template:
+    src: dbbp_patch_list.j2
+    dest: "{{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: DBBP RAC | check for conflicts (oracle_home)
+  shell: "{{ oracle_home }}/OPatch/opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+  environment: "{{ env }}"
+  register: opatch_conflicts
+  with_items:
+    - CheckConflictAgainstOHWithDetail
+    - CheckSystemSpace
+
+- name: DBBP RAC | check for conflicts (grid_home)
+  shell: "{{ grid_home }}/OPatch/opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+  environment: "{{ env }}"
+  register: opatch_conflicts
+  with_items:
+    - CheckConflictAgainstOHWithDetail
+    - CheckSystemSpace
+
+- name: RAC | Apply patch to first node
+  shell: "{{ grid_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
+  become_user: root
+  when: master_node
+
+- name: RAC | Shutdown Oracle Home on first node
+  shell: srvctl stop home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }} -f
+  become_user: "{{ oracle_user }}"
+  environment: "{{ env }}"
+  when: master_node and oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+- name: RAC | Apply One Off Patches to First node
+  include: oneoff_apply.yml
+  when: master_node and oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+- name: RAC | Startup Oracle Home on first node
+  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
+  become_user: "{{ oracle_user }}"
+  environment: "{{ env }}"
+  when: master_node and oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+- name: RAC | Check if stuff is running
+  shell: "{{ grid_home }}/bin/crsctl stat res -t"
+  become_user: "{{ oracle_user }}"
+  when: master_node
+  register: stat_res_t
+
+- debug: var=stat_res_t.stdout_lines
+
+- name: RAC | Pause after first node
+  pause: prompt="Verify everything's running on the first node."
+
+- name: RAC | Apply patch to second node
+  shell: "{{ grid_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
+  become_user: root
+  when: not master_node
+
+- name: RAC | Shutdown Oracle Home on second node
+  shell: srvctl stop home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }} -f
+  become_user: "{{ oracle_user }}"
+  environment: "{{ env }}"
+  when: not master_node and oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+- name: RAC | Apply One Off Patches to second node
+  include: oneoff_apply.yml
+  when: not master_node and oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+- name: RAC | Startup Oracle Home on second node
+  shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
+  become_user: "{{ oracle_user }}"
+  environment: "{{ env }}"
+  when: not master_node and oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+- name: RAC | Run Catbundle Script
+  include: run_catbundle.yml
+  run_once: true
+
+- name: RAC | Opatch lsinventory
+  shell: "{{ item }}/OPatch/opatch lsinventory -oh {{ item }}"
+  become_user: "{{ oracle_user }}"
+  with_items:
+    - "{{ oracle_home }}"
+    - "{{ grid_home|default(omit) }}"
+  register: lsinv_post
+
+- debug: var=lsinv_post.results
