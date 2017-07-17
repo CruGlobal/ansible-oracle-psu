@@ -9,8 +9,8 @@ env:
 # Files should exist in path defined by oracle_stage_install.
 opatch:
   12.1.0.2:
-    version: 12.1.0.1.12
-    filename: p6880880_121010_Linux-x86-64.zip
+    version: 12.2.0.1.9
+    filename: p6880880_122010_Linux-x86-64.zip
   11.2.0.4:
     version: 11.2.0.3.12
     filename: p6880880_112000_Linux-x86-64.zip
