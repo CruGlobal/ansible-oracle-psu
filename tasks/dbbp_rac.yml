@@ -10,8 +10,9 @@
 
 - debug: var=all_databases.stdout_lines
 
-- name: DBBP SI | Get list of databases running in 'oracle_home'
+- name: DBBP RAC | Get list of databases running in 'oracle_home'
   shell: cat /etc/oratab | grep '{{ all_databases.stdout_lines | join('\|') }}' | grep {{ oracle_home }} | egrep ':N|:Y'|grep -v \*|cut -f1 -d':'
+  when: not ansible_check_mode
   register: dblist
   tags: datapatch
 
@@ -23,9 +24,12 @@
     dest: "{{ oracle_home }}/srvm/admin/psu_state.txt"
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
+  when: not ansible_check_mode
 
 - name: DBBP RAC | delete srvctl state file if it exists
-  file: path={{ oracle_home }}/srvm/admin/oneoffstop.txt state=absent
+  file:
+    path: "{{ oracle_home }}/srvm/admin/oneoffstop.txt"
+    state: absent
 
 - name: DBBP RAC | Update opatch
   unarchive:
@@ -34,6 +38,7 @@
     copy: no
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
+  when: not ansible_check_mode
   with_items:
     - "{{ oracle_home }}"
     - "{{ grid_home|default(omit) }}"

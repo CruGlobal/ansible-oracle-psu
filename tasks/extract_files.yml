@@ -17,7 +17,7 @@
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
   run_once: true
-  when: "'{{ patch_type }}' == 'psu'"
+  when: "'{{ patch_type }}' == 'psu' and not ansible_check_mode"
 
 - name: Unzip DBBP
   unarchive:
@@ -28,7 +28,7 @@
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
   run_once: true
-  when: "'{{ patch_type }}' == 'dbbp'"
+  when: "'{{ patch_type }}' == 'dbbp' and not ansible_check_mode"
 
 - name: Unzip oneoff patches
   unarchive:
@@ -39,5 +39,5 @@
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
   with_items: "{{ oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ]|default([]) }}"
-  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined and not ansible_check_mode
   run_once: true
