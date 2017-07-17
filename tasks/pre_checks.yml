@@ -25,13 +25,14 @@
     get_checksum: false
     get_md5: false
   register: patch_st
-  when: "'{{ patch_type }}' == 'dbbp'"
+  when: "'{{ patch_type }}' == 'dbbp' and not ansible_check_mode"
   failed_when: "not {{ patch_st.stat.exists }}"
 
 - name: Check if OPatch zip file exists
   stat:
     path: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
   register: opatch_st
+  when: not ansible_check_mode
   failed_when: "not {{ opatch_st.stat.exists }}"
 
 # - name: fail if PSU-Specific one-off patches are missing
