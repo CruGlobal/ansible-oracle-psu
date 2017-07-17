@@ -19,6 +19,11 @@ quarterly_patches:
   # Database Proactive Patch (only for 12.1 and later)
   dbbp:
     12.1.0.2:
+      APR2017:
+        patchversion: 12.1.0.2.170418
+        filename: p25433352_121020_Linux-x86-64.zip
+        patchid: 25433352
+        si_patchid: 25397136
       JUL2016:
         patchversion: 12.1.0.2.160719
         filename: p23273686_121020_Linux-x86-64.zip
@@ -127,7 +132,7 @@ oneoff_patches:
     #   filename: p20879889_121020_Linux-x86-64.zip
 
 #PSU version specific patches
-  # 12.1.0.2.160419: 
+  # 12.1.0.2.160419:
     # - patchid: 21091518   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
     #   filename: p21091518_121020_Linux-x86-64.zip
     # - patchid: 20807398   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
