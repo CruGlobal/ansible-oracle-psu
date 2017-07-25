@@ -19,6 +19,11 @@ quarterly_patches:
   # Database Proactive Patch (only for 12.1 and later)
   dbbp:
     12.1.0.2:
+      JUL2017:
+        patchversion: 12.1.0.2.170718
+        filename: p26022196_121020_Linux-x86-64.zip
+        patchid: 26022196
+        si_patchid: 25869760
       APR2017:
         patchversion: 12.1.0.2.170418
         filename: p25433352_121020_Linux-x86-64.zip
@@ -80,6 +85,11 @@ quarterly_patches:
           patchid: 20831110
 
     11.2.0.4:
+      JUL2017:
+        patchversion: 11.2.0.4.170718
+        si:
+          filename: p25869727_112040_Linux-x86-64.zip
+          patchid: 25869727
       JUL2016:
         patchversion: 11.2.0.4.160719
         rac:
