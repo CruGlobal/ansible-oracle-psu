@@ -2,7 +2,7 @@
 # Set patch type to dbbp if oracle_version >= 12, else set it to psu.
 patch_type: "{{ 'dbbp' if oracle_version | version_compare('12', '>=') else 'psu' }}"
 
-patch_name: APR2017  # Should match psu dictionary variable defined in vars/main.yml
+patch_name: JUL2017  # Should match psu dictionary variable defined in vars/main.yml
 
 shutdown_listener: true # set to false if patching an empty oracle home (ie new 12c install)
 rollback_psu: false # set to true if rolling back current PSU.
