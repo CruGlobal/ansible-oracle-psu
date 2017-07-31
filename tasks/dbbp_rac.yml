@@ -46,17 +46,17 @@
     file_type: directory
     patterns: '^\d{8}'
     use_regex: true
-  register: dbbp_patches
+  register: quarterly_patch_numbers
 
 - name: dbbp_rac |  Template patch list
   template:
-    src: dbbp_patch_list.j2
-    dest: "{{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+    src: quarterly_patch_list.j2
+    dest: "{{ oracle_stage_base }}/quarterly_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
 
 - name: dbbp_rac |  check for conflicts (oracle_home)
-  shell: "{{ oracle_home }}/OPatch/opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+  shell: "{{ oracle_home }}/OPatch/opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/quarterly_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
   environment: "{{ env }}"
   register: opatch_conflicts
   with_items:
@@ -64,7 +64,7 @@
     - CheckSystemSpace
 
 - name: dbbp_rac |  check for conflicts (grid_home)
-  shell: "{{ grid_home }}/OPatch/opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/dbbp_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+  shell: "{{ grid_home }}/OPatch/opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/quarterly_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
   environment: "{{ env }}"
   register: opatch_conflicts
   with_items:
