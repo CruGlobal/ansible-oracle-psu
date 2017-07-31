@@ -1,6 +1,4 @@
 ---
-# Set patch type to dbbp if oracle_version >= 12, else set it to psu.
-patch_type: "{{ 'dbbp' if oracle_version | version_compare('12', '>=') else 'psu' }}"
 
 patch_name: JUL2017  # Should match psu dictionary variable defined in vars/main.yml
 
