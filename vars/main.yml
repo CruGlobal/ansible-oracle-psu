@@ -8,6 +8,9 @@ env:
 # Latest opatch versions and files.
 # Files should exist in path defined by oracle_stage_install.
 opatch:
+  12.2.0.1:
+    version: 12.2.0.1.9
+    filename: p6880880_122010_Linux-x86-64.zip
   12.1.0.2:
     version: 12.2.0.1.9
     filename: p6880880_122010_Linux-x86-64.zip
@@ -16,7 +19,16 @@ opatch:
     filename: p6880880_112000_Linux-x86-64.zip
 
 quarterly_patches:
-  # Database Proactive Patch (only for 12.1 and later)
+  # Release Update Patch for 12.2
+  ru:
+    12.2.0.1:
+      JUL2017:
+        patchversion: 12.2.0.1.170718
+        filename: p26133434_122010_Linux-x86-64.zip
+        patchid: 26133434
+        si_patchid: 26123830
+
+  # Database Proactive Patch for 12.1
   dbbp:
     12.1.0.2:
       JUL2017:
