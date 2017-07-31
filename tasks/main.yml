@@ -24,18 +24,11 @@
   become_user: "{{ oracle_user }}"
   when: not rollback_psu
 
-#Rollback PSU by defining variable: rollback_psu: true when calling this role
-- name: Rollback PSU on Single Instance Database Home
-  include: psu_rollback_si.yml
+- name: Rollback Quarterly Patch
+  include: "{{ patch_type }}_rollback_{{ oracle_install_type }}.yml"
   become_user: "{{ oracle_user }}"
-  when: oracle_install_type == 'si' and rollback_psu
-  tags: rollback_si
-
-- name: Rollback PSU on RAC cluster
-  include: psu_rollback_rac.yml
-  become_user: "{{ oracle_user }}"
-  when: oracle_install_type == 'rac' and rollback_psu
-  tags: rollback_rac
+  when: rollback_psu
+  tags: rollback
 
 - name: Start EM Agent
   shell: "{{ agent_home }}/bin/emctl start agent"
