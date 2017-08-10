@@ -142,26 +142,6 @@
   register: dblist
   tags: datapatch
 
-- name: dbbp_rac |  Load Modified SQL Files into the Database
-  shell: "export ORACLE_SID={{ item }}; ./datapatch -verbose"
-  become_user: "{{ oracle_user }}"
-  register: datapatch
-  environment: "{{ env }}"
-  with_items: "{{ dblist.stdout_lines }}"
-  args:
-    chdir: "{{ oracle_home }}/OPatch"
-  run_once: true
-  failed_when: datapatch.rc == 1
-  when: oracle_version == '12.1.0.2'
-  ignore_errors: true
-  tags: datapatch
-
-- name: dbbp_rac |  Opatch lsinventory
-  shell: "{{ item }}/OPatch/opatch lsinventory -oh {{ item }}"
-  become_user: "{{ oracle_user }}"
-  with_items:
-    - "{{ oracle_home }}"
-    - "{{ grid_home|default(omit) }}"
-  register: lsinv_post
-
-- debug: var=lsinv_post.results
+- name: DBBP SI | Load Modified SQL Files into the Database
+  include: run_catbundle.yml
+  tags: catbundle
