@@ -79,29 +79,14 @@ quarterly_patches:
         si:
           filename: p21948354_121020_Linux-x86-64.zip
           patchid: 21948354
-      OCT2015:
-        patchversion: 12.1.0.2.5
-        rac:
-          filename: p21523234_121020_Linux-x86-64.zip
-          patchid: 21523234
-        si:
-          filename: p21359755_121020_Linux-x86-64.zip
-          patchid: 21359755
-      JUL2015:
-        patchversion: 12.1.0.2.4
-        rac:
-          filename: p20996835_121020_Linux-x86-64.zip
-          patchid: 20996835
-        si:
-          filename: p20831110_121020_Linux-x86-64.zip
-          patchid: 20831110
 
     11.2.0.4:
       JUL2017:
         patchversion: 11.2.0.4.170718
-        si:
-          filename: p25869727_112040_Linux-x86-64.zip
-          patchid: 25869727
+        filename: p26030799_112040_Linux-x86-64.zip
+        patchid: 26030799
+        si_patchid: 25869727
+
       JUL2016:
         patchversion: 11.2.0.4.160719
         rac:
@@ -126,25 +111,6 @@ quarterly_patches:
         si:
           filename: p21948347_112040_Linux-x86-64.zip
           patchid: 21948347
-      OCT2015:
-        patchversion: 11.2.0.4.8
-        rac:
-          filename: p21523375_112040_Linux-x86-64.zip
-          patchid: 21523375
-        si:
-          filename: p21352635_112040_Linux-x86-64.zip
-          patchid: 21352635
-      JUL2015:
-        patchversion: 11.2.0.4.7
-        rac:
-          filename: p20996923_112040_Linux-x86-64.zip
-          patchid: 20996923
-        si:
-          filename: p20760982_112040_Linux-x86-64.zip
-          patchid: 20760982
-
-
-
 
 oneoff_patches:
   # 12.1.0.2:
