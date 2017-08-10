@@ -8,17 +8,6 @@
     group: "{{ oracle_group }}"
   run_once: true
 
-- name: Unzip PSU
-  unarchive:
-    src: "{{ oracle_stage_install }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].filename }}"
-    dest: "{{ patch_directory}}/"
-    copy: no
-    creates: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }}/README.txt"
-    owner: "{{ oracle_user }}"
-    group: "{{ oracle_group }}"
-  run_once: true
-  when: "'{{ patch_type }}' == 'psu' and not ansible_check_mode"
-
 - name: Unzip Quarterly Patch
   unarchive:
     src: "{{ oracle_stage_install }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].filename }}"
@@ -28,7 +17,7 @@
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
   run_once: true
-  when: "'{{ patch_type }}' != 'psu' and not ansible_check_mode"
+  when: not ansible_check_mode
 
 - name: Unzip oneoff patches
   unarchive:
