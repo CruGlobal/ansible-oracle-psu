@@ -74,7 +74,7 @@
   with_items: "{{ dblist.stdout_lines }}"
   when: oracle_version == '12.1.0.2'
 
-- name: RU SU | Run Catbundle.sql
+- name: RU SU | Load Modified SQL Files into the Database
   include: run_catbundle.yml
   tags: catbundle
 
@@ -83,10 +83,3 @@
   environment: "{{ env }}"
   when: shutdown_listener | default(false)
   ignore_errors: true
-
-- name: RU SU | Check opatch lsinventory (DB)
-  shell: "opatch lsinventory"
-  environment: "{{ env }}"
-  register: opatchls
-
-- debug: var=opatchls.stdout_lines
