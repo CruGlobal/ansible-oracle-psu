@@ -1,0 +1,102 @@
+---
+- debug: var=patch_type
+
+- name: Run pre-check tasks
+  include: pre_checks.yml
+  tags: pre_checks
+
+- name: Extract Patch patches
+  include: extract_files.yml
+  when: not rollback_psu
+  tags: extract_files
+
+- name: Update opatch in database home
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
+    dest: "{{ oracle_home }}"
+    copy: no
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: Update opatch in grid home
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
+    dest: "{{ grid_home }}"
+    copy: no
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  when:
+    - oracle_version == grid_version | default('None')
+    - oracle_install_type == "rac"
+
+- name: Get list of patches
+  find:
+    path: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
+    file_type: directory
+    patterns: '^\d{8}'
+    use_regex: true
+  register: quarterly_patch_numbers
+
+- name: Template patch list
+  template:
+    src: quarterly_patch_list.j2
+    dest: "{{ oracle_stage_base }}/quarterly_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: check for conflicts (oracle home)
+  shell: "opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/quarterly_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: opatch_conflicts
+  with_items:
+    - CheckConflictAgainstOHWithDetail
+    - CheckSystemSpace
+
+- debug: var=opatch_conflicts
+  when: "{{ opatch_conflicts.changed | default(False) }}"
+
+
+- name: check for conflicts (grid home)
+  shell: "{{ grid_home }}/OPatch/opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/quarterly_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: opatch_conflicts
+  when:
+    - oracle_version == grid_version | default('None')
+    - oracle_install_type == "rac"
+  with_items:
+    - CheckConflictAgainstOHWithDetail
+    - CheckSystemSpace
+
+- debug: var=opatch_conflicts
+  when: "{{ opatch_conflicts.changed | default(False) }}"
+
+- name: Run Opatchauto Analyze to check for conflicts (grid home)
+  shell: "{{ grid_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }} -analyze"
+  become_user: root
+  register: opatch_conflicts
+  when:
+    - oracle_version == grid_version | default('None')
+    - oracle_install_type == "rac"
+
+- debug: var=opatch_conflicts
+  when: "{{ opatch_conflicts.changed | default(False) }}"
+
+- name: Template oneoff patch list
+  template:
+    src: patch_list.j2
+    dest: "{{ oracle_stage_base }}/patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+- name: Opatch prereq check for oneoff patches
+  shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ oracle_stage_base }}/patch_list_{{ oracle_version }}_{{ patch_name }}.txt
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: oneoff_conflicts
+  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+- debug: var=oneoff_conflicts.results
+  when: "{{ oneoff_conflicts.changed | default(False) }}"

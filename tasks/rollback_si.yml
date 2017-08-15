@@ -1,0 +1,56 @@
+---
+# Rollback RU patch on single instance db home.
+
+- name: SI ROLLBACK | get list of database names on host
+  shell: cat /etc/oratab|grep {{ oracle_home }}|egrep ':N|:Y'|grep -v \*|cut -f1 -d':'
+  register: dblist
+  tags: datapatch
+
+- name: SI ROLLBACK | shutdown databases running in oracle_home
+  shell: export ORACLE_SID={{ item }}; echo "shutdown immediate;" | sqlplus / as sysdba
+  environment: "{{ env }}"
+  with_items: "{{ dblist.stdout_lines }}"
+
+- name: SI ROLLBACK | shutdown listener in oracle_home
+  shell: "lsnrctl stop listener"
+  environment: "{{ env }}"
+  when: shutdown_listener | default(false)
+  ignore_errors: true
+
+- name: SI ROLLBACK | Rollback PSU Specific One-off Patches
+  shell: "opatch rollback -silent -id {{ item.patchid }}"
+  become_user: "{{ oracle_user }}"
+  environment: "{{ env }}"
+  with_items: "{{ oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ]|default([]) }}"
+  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+  register: oneoff_rollback
+  ignore_errors: true
+  
+- name: SI ROLLBACK | opatch rollback
+  shell: "opatch rollback -silent -id {{ quarterly_patches[patch_type][oracle_version][patch_name].si_patchid }}"
+  environment: "{{ env }}"
+  register: opatch_rollback
+  changed_when: opatch_rollback.rc != 1 and opatch_rollback.rc != 135
+  failed_when: opatch_rollback.rc == 1
+
+- debug: var=opatch_rollback.stdout_lines
+
+- name: SI ROLLBACK | startup databases
+  shell: export ORACLE_SID={{ item }}; echo "startup;" | sqlplus / as sysdba
+  environment: "{{ env }}"
+  with_items: "{{ dblist.stdout_lines }}"
+
+- name: SI ROLLBACK | startup pluggable databases
+  shell: export ORACLE_SID={{ item }}; echo "alter pluggable database all open;" | sqlplus / as sysdba
+  environment: "{{ env }}"
+  with_items: "{{ dblist.stdout_lines }}"
+
+- name: SI ROLLBACK | Run the datapatch utility
+  include: run_catbundle.yml
+  tags: catbundle
+
+- name: SI ROLLBACK | startup listener in oracle_home
+  shell: "lsnrctl start listener"
+  environment: "{{ env }}"
+  when: shutdown_listener | default(false)
+  ignore_errors: true

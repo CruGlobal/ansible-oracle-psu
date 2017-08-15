@@ -2,8 +2,7 @@
 
 - name: Rollback PSU Specific One-off Patches
   shell: "{{ oracle_home }}/OPatch/opatch rollback -silent -local -id {{ item.patchid }}"
-  sudo: yes
-  sudo_user: "{{ oracle_user }}"
+  become_user: "{{ oracle_user }}"
   with_items: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ]|default([])
   when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
   register: oneoff_rollback

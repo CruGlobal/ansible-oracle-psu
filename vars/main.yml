@@ -54,63 +54,12 @@ quarterly_patches:
 
   # PSU information for RAC and Single Instance (11.2 and 12.1)
   psu:
-    12.1.0.2:
-      JUL2016:
-        patchversion: 12.1.0.2.160719
-        rac:
-          filename: p23273629_121020_Linux-x86-64.zip
-          patchid: 23273629
-        si:
-          filename: p23054246_121020_Linux-x86-64.zip
-          patchid: 23054246
-      APR2016:
-        patchversion: 12.1.0.2.160419
-        rac:
-          filename: p22646084_121020_Linux-x86-64.zip
-          patchid: 22646084
-        si:
-          filename: p22291127_121020_Linux-x86-64.zip
-          patchid: 22291127
-      JAN2016:
-        patchversion: 12.1.0.2.160119
-        rac:
-          filename: p22191349_121020_Linux-x86-64.zip
-          patchid: 22191349
-        si:
-          filename: p21948354_121020_Linux-x86-64.zip
-          patchid: 21948354
-
     11.2.0.4:
       JUL2017:
         patchversion: 11.2.0.4.170718
         filename: p26030799_112040_Linux-x86-64.zip
         patchid: 26030799
         si_patchid: 25869727
-
-      JUL2016:
-        patchversion: 11.2.0.4.160719
-        rac:
-          filename: p23274134_112040_Linux-x86-64.zip
-          patchid: 23274134
-        si:
-          filename: p23054359_112040_Linux-x86-64.zip
-          patchid: 23054359
-      APR2016:
-        patchversion: 11.2.0.4.160419
-        rac:
-          filename: p22646198_112040_Linux-x86-64.zip
-          patchid: 22646198
-        si:
-          filename: p22502456_112040_Linux-x86-64.zip
-          patchid: 22502456
-      JAN2016:
-        patchversion: 11.2.0.4.160119
-        rac:
-          filename: p22191577_112040_Linux-x86-64.zip
-          patchid: 22191577
-        si:
-          filename: p21948347_112040_Linux-x86-64.zip
-          patchid: 21948347
 
 oneoff_patches:
   # 12.1.0.2:
