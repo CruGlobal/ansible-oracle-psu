@@ -8,17 +8,39 @@ env:
 # Latest opatch versions and files.
 # Files should exist in path defined by oracle_stage_install.
 opatch:
+  12.2.0.1:
+    version: 12.2.0.1.9
+    filename: p6880880_122010_Linux-x86-64.zip
   12.1.0.2:
-    version: 12.1.0.1.12
-    filename: p6880880_121010_Linux-x86-64.zip
+    version: 12.2.0.1.9
+    filename: p6880880_122010_Linux-x86-64.zip
   11.2.0.4:
     version: 11.2.0.3.12
     filename: p6880880_112000_Linux-x86-64.zip
 
 quarterly_patches:
-  # Database Proactive Patch (only for 12.1 and later)
+  # Release Update Patch for 12.2
+  ru:
+    12.2.0.1:
+      JUL2017:
+        patchversion: 12.2.0.1.170718
+        filename: p26133434_122010_Linux-x86-64.zip
+        patchid: 26133434
+        si_patchid: 26123830
+
+  # Database Proactive Patch for 12.1
   dbbp:
     12.1.0.2:
+      JUL2017:
+        patchversion: 12.1.0.2.170718
+        filename: p26022196_121020_Linux-x86-64.zip
+        patchid: 26022196
+        si_patchid: 25869760
+      APR2017:
+        patchversion: 12.1.0.2.170418
+        filename: p25433352_121020_Linux-x86-64.zip
+        patchid: 25433352
+        si_patchid: 25397136
       JUL2016:
         patchversion: 12.1.0.2.160719
         filename: p23273686_121020_Linux-x86-64.zip
@@ -32,92 +54,12 @@ quarterly_patches:
 
   # PSU information for RAC and Single Instance (11.2 and 12.1)
   psu:
-    12.1.0.2:
-      JUL2016:
-        patchversion: 12.1.0.2.160719
-        rac:
-          filename: p23273629_121020_Linux-x86-64.zip
-          patchid: 23273629
-        si:
-          filename: p23054246_121020_Linux-x86-64.zip
-          patchid: 23054246
-      APR2016:
-        patchversion: 12.1.0.2.160419
-        rac:
-          filename: p22646084_121020_Linux-x86-64.zip
-          patchid: 22646084
-        si:
-          filename: p22291127_121020_Linux-x86-64.zip
-          patchid: 22291127
-      JAN2016:
-        patchversion: 12.1.0.2.160119
-        rac:
-          filename: p22191349_121020_Linux-x86-64.zip
-          patchid: 22191349
-        si:
-          filename: p21948354_121020_Linux-x86-64.zip
-          patchid: 21948354
-      OCT2015:
-        patchversion: 12.1.0.2.5
-        rac:
-          filename: p21523234_121020_Linux-x86-64.zip
-          patchid: 21523234
-        si:
-          filename: p21359755_121020_Linux-x86-64.zip
-          patchid: 21359755
-      JUL2015:
-        patchversion: 12.1.0.2.4
-        rac:
-          filename: p20996835_121020_Linux-x86-64.zip
-          patchid: 20996835
-        si:
-          filename: p20831110_121020_Linux-x86-64.zip
-          patchid: 20831110
-
     11.2.0.4:
-      JUL2016:
-        patchversion: 11.2.0.4.160719
-        rac:
-          filename: p23274134_112040_Linux-x86-64.zip
-          patchid: 23274134
-        si:
-          filename: p23054359_112040_Linux-x86-64.zip
-          patchid: 23054359
-      APR2016:
-        patchversion: 11.2.0.4.160419
-        rac:
-          filename: p22646198_112040_Linux-x86-64.zip
-          patchid: 22646198
-        si:
-          filename: p22502456_112040_Linux-x86-64.zip
-          patchid: 22502456
-      JAN2016:
-        patchversion: 11.2.0.4.160119
-        rac:
-          filename: p22191577_112040_Linux-x86-64.zip
-          patchid: 22191577
-        si:
-          filename: p21948347_112040_Linux-x86-64.zip
-          patchid: 21948347
-      OCT2015:
-        patchversion: 11.2.0.4.8
-        rac:
-          filename: p21523375_112040_Linux-x86-64.zip
-          patchid: 21523375
-        si:
-          filename: p21352635_112040_Linux-x86-64.zip
-          patchid: 21352635
-      JUL2015:
-        patchversion: 11.2.0.4.7
-        rac:
-          filename: p20996923_112040_Linux-x86-64.zip
-          patchid: 20996923
-        si:
-          filename: p20760982_112040_Linux-x86-64.zip
-          patchid: 20760982
-
-
-
+      JUL2017:
+        patchversion: 11.2.0.4.170718
+        filename: p26030799_112040_Linux-x86-64.zip
+        patchid: 26030799
+        si_patchid: 25869727
 
 oneoff_patches:
   # 12.1.0.2:
@@ -127,7 +69,7 @@ oneoff_patches:
     #   filename: p20879889_121020_Linux-x86-64.zip
 
 #PSU version specific patches
-  # 12.1.0.2.160419: 
+  # 12.1.0.2.160419:
     # - patchid: 21091518   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
     #   filename: p21091518_121020_Linux-x86-64.zip
     # - patchid: 20807398   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)

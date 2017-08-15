@@ -1,6 +1,9 @@
 ---
 # psu-apply steps for RAC cluster
 
+- debug: var=oracle_version
+- debug: var=grid_version
+
 - name: RAC | get list of database names on host
   shell: srvctl config database
   become_user: "{{ oracle_user }}"
@@ -16,20 +19,29 @@
     dest: "{{ oracle_home }}/srvm/admin/psu_state.txt"
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
+  when: not ansible_check_mode
 
 - name: RAC | delete srvctl state file if it exists
-  file: path={{ oracle_home }}/srvm/admin/oneoffstop.txt state=absent
+  file:
+    path: "{{ oracle_home }}/srvm/admin/oneoffstop.txt"
+    state: absent
 
-- name: RAC | Update opatch
+- name: RAC | Update opatch in database home
   unarchive:
     src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
-    dest: "{{ item }}"
+    dest: "{{ oracle_home }}"
     copy: no
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
-  with_items:
-    - "{{ oracle_home }}"
-    - "{{ grid_home|default(omit) }}"
+
+- name: RAC | Update opatch in grid home
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
+    dest: "{{ grid_home }}"
+    copy: no
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  when: "'{{ oracle_version }}' == '{{ grid_version }}'"
 
 - name: RAC | Opatch lsinventory
   shell: "{{ item }}/OPatch/opatch lsinventory -oh {{ item }}"
@@ -39,20 +51,23 @@
     - "{{ grid_home|default(omit) }}"
   register: lsinv_pre
 
-- debug: var=lsinv_pre.results
-
-- name: RAC | Check PSU for conflicts
-  shell: "{{ item }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }}"
+- name: RAC | Check PSU for conflicts (database home)
+  shell: "{{ oracle_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
   become_user: "{{ oracle_user }}"
   register: opatch_conflicts
-  with_items:
-    - "{{ oracle_home }}"
-    - "{{ grid_home|default(omit) }}"
 
-- name: RAC | Apply patch to first node
-  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+- name: RAC | Check PSU for conflicts (grid home)
+  shell: "{{ grid_home }}/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
+  become_user: "{{ oracle_user }}"
+  register: opatch_conflicts
+  when: "'{{ oracle_version }}' == '{{ grid_version }}'"
+
+- name: RAC | Apply patch to first node (opatchauto)
+  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   become_user: root
-  when: master_node
+  when:
+    - master_node
+    - "'{{ oracle_version }}' == '{{ grid_version }}'"
 
 - name: RAC | Shutdown Oracle Home on first node
   shell: srvctl stop home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }} -f
@@ -60,9 +75,16 @@
   environment: "{{ env }}"
   when: master_node
 
+- name: RAC | Apply PSU to database home (if db_home is different version than grid)
+  shell: "opatch apply -silent -local -force -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  environment: "{{ env }}"
+  args:
+    chdir: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].si_patchid }}"
+  when: "master_node and '{{ oracle_version }}' != '{{ grid_version }}'"
+
 - name: RAC | Apply One Off Patches to First node
   include: oneoff_apply.yml
-  when: master_node
+  when: master_node and oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion] is defined
 
 - name: RAC | Startup Oracle Home on first node
   shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
@@ -82,9 +104,9 @@
   pause: prompt="Verify everything's running on the first node."
 
 - name: RAC | Apply patch to second node
-  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatch auto {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   become_user: root
-  when: not master_node
+  when: "not master_node and '{{ oracle_version }}' == '{{ grid_version }}'"
 
 - name: RAC | Shutdown Oracle Home on second node
   shell: srvctl stop home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/oneoffstop.txt -n {{ ansible_hostname }} -f
@@ -92,9 +114,16 @@
   environment: "{{ env }}"
   when: not master_node
 
+- name: RAC | Apply PSU to database home (if db_home is different version than grid)
+  shell: "opatch apply -silent -force -local -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  environment: "{{ env }}"
+  args:
+    chdir: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].si_patchid }}"
+  when: "not master_node and '{{ oracle_version }}' != '{{ grid_version }}'"
+
 - name: RAC | Apply One Off Patches to second node
   include: oneoff_apply.yml
-  when: not master_node
+  when: not master_node and oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion] is defined
 
 - name: RAC | Startup Oracle Home on second node
   shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}
@@ -102,16 +131,6 @@
   environment: "{{ env }}"
   when: not master_node
 
-- name: RAC | Run Catbundle Script
+- name: RAC | Load Modified SQL Files into the Database
   include: run_catbundle.yml
-  run_once: true
-
-- name: RAC | Opatch lsinventory
-  shell: "{{ item }}/OPatch/opatch lsinventory -oh {{ item }}"
-  become_user: "{{ oracle_user }}"
-  with_items:
-    - "{{ oracle_home }}"
-    - "{{ grid_home|default(omit) }}"
-  register: lsinv_post
-
-- debug: var=lsinv_post.results
+  tags: catbundle

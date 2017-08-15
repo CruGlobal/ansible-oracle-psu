@@ -1,7 +1,7 @@
 ---
 # Apply DBBP patch on single instance db home.
 
-- name: DBBP SI | update opatch
+- name: RU SU | update opatch
   unarchive:
     src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
     dest: "{{ oracle_home }}"
@@ -9,7 +9,7 @@
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
 
-- name: DBBP SI | Get list of patches in DBBP
+- name: RU SU | Get list of patches
   find:
     path: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
     file_type: directory
@@ -17,14 +17,14 @@
     use_regex: true
   register: quarterly_patch_numbers
 
-- name: DBBP SI | Template patch list
+- name: RU SU | Template patch list
   template:
     src: quarterly_patch_list.j2
     dest: "{{ oracle_stage_base }}/quarterly_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
 
-- name: DBBP SI | check for conflicts
+- name: RU SU | check for conflicts
   shell: "opatch prereq {{ item }} -phBaseFile {{ oracle_stage_base }}/quarterly_patch_list_{{ oracle_version }}_{{ patch_name }}.txt"
   environment: "{{ env }}"
   register: opatch_conflicts
@@ -34,23 +34,23 @@
 
 - debug: var=opatch_conflicts
 
-- name: DBBP SI | get list of database names on host
+- name: RU SU | get list of database names on host
   shell: cat /etc/oratab|grep {{ oracle_home }}|egrep ':N|:Y'|grep -v \*|cut -f1 -d':'
   register: dblist
   tags: datapatch
 
-- name: DBBP SI | shutdown databases running in oracle_home
+- name: RU SU | shutdown databases running in oracle_home
   shell: export ORACLE_SID={{ item }}; echo "shutdown immediate;" | sqlplus / as sysdba
   environment: "{{ env }}"
   with_items: "{{ dblist.stdout_lines }}"
 
-- name: DBBP SI | shutdown listener in oracle_home
+- name: RU SU | shutdown listener in oracle_home
   shell: "lsnrctl stop listener"
   environment: "{{ env }}"
   when: shutdown_listener | default(false)
   ignore_errors: true
 
-- name: DBBP SI | opatch apply
+- name: RU SU | opatch apply
   shell: "opatch apply -silent -force -ocmrf {{ oracle_stage_install }}/ocm.rsp"
   environment: "{{ env }}"
   args:
@@ -59,26 +59,26 @@
 
 - debug: var=opatch_apply.stdout_lines
 
-- name: DBBP SI | apply oneoff patches
+- name: RU SU | apply oneoff patches
   include: oneoff_apply.yml
   when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
 
-- name: DBBP SI | startup databases
+- name: RU SU | startup databases
   shell: export ORACLE_SID={{ item }}; echo "startup;" | sqlplus / as sysdba
   environment: "{{ env }}"
   with_items: "{{ dblist.stdout_lines }}"
 
-- name: DBBP SI | 12.1 - startup pluggable databases
+- name: RU SU | 12.1 - startup pluggable databases
   shell: export ORACLE_SID={{ item }}; echo "alter pluggable database all open;" | sqlplus / as sysdba
   environment: "{{ env }}"
   with_items: "{{ dblist.stdout_lines }}"
   when: oracle_version == '12.1.0.2'
 
-- name: DBBP SI | Load Modified SQL Files into the Database
+- name: RU SU | Load Modified SQL Files into the Database
   include: run_catbundle.yml
   tags: catbundle
 
-- name: DBBP SI | startup listener in oracle_home
+- name: RU SU | startup listener in oracle_home
   shell: "lsnrctl start listener"
   environment: "{{ env }}"
   when: shutdown_listener | default(false)

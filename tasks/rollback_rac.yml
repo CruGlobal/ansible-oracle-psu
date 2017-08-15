@@ -28,10 +28,20 @@
   when: master_node
 
 - name: RAC | Rollback PSU
-  shell: "{{ grid_home }}/OPatch/opatchauto rollback {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatchauto rollback -local {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
   become_user: root
   register: rac_psu_rollback
-  when: master_node
+  when:
+    - master_node
+    - "'{{ oracle_version }}' == '{{ grid_version }}'"
+
+- name: RAC | Rollback PSU to database home (if db_home is different version than grid)
+  shell: "opatch rollback -silent -id {{ quarterly_patches[patch_type][oracle_version][patch_name].si_patchid }}"
+  environment: "{{ env }}"
+  when:
+    - master_node
+    - "'{{ oracle_version }}' != '{{ grid_version }}'"
+
 
 - debug: var=rac_psu_rollback.stdout_lines
 
@@ -61,10 +71,19 @@
   when: not master_node
 
 - name: RAC | Rollback PSU on second node
-  shell: "{{ grid_home }}/OPatch/opatchauto rollback {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }} -ocmrf {{ oracle_stage_install }}/ocm.rsp"
+  shell: "{{ grid_home }}/OPatch/opatchauto rollback {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
   become_user: root
   register: rac_psu_rollback
-  when: not master_node
+  when:
+    - not master_node
+    - "'{{ oracle_version }}' == '{{ grid_version }}'"
+
+- name: RAC | Rollback PSU to database home (if db_home is different version than grid)
+  shell: "opatch rollback -silent -id {{ quarterly_patches[patch_type][oracle_version][patch_name].si_patchid }}"
+  environment: "{{ env }}"
+  when:
+    - not master_node
+    - "'{{ oracle_version }}' != '{{ grid_version }}'"
 
 - name: RAC | Startup Oracle Home on second node
   shell: srvctl start home -o {{ oracle_home }} -s {{ oracle_home }}/srvm/admin/psu_state.txt -n {{ ansible_hostname }}

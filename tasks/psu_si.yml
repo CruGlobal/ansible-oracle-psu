@@ -10,7 +10,7 @@
     group: "{{ oracle_group }}"
 
 - name: SI | check for conflicts
-  shell: "opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }}"
+  shell: "opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].si_patchid }}"
   environment: "{{ env }}"
   register: opatch_conflicts
 
@@ -33,7 +33,7 @@
   ignore_errors: true
 
 - name: SI | opatch apply
-  shell: "opatch apply -silent -force -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name][oracle_install_type].patchid }}"
+  shell: "opatch apply -silent -force -ocmrf {{ oracle_stage_install }}/ocm.rsp {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].si_patchid }}"
   environment: "{{ env }}"
   register: opatch_apply
 
@@ -54,7 +54,7 @@
   with_items: "{{ dblist.stdout_lines }}"
   when: oracle_version == '12.1.0.2'
 
-- name: Run Catbundle.sql
+- name: SI | Load Modified SQL Files into the Database
   include: run_catbundle.yml
   tags: catbundle
 
@@ -63,10 +63,3 @@
   environment: "{{ env }}"
   when: shutdown_listener | default(false)
   ignore_errors: true
-
-- name: Check opatch lsinventory (DB)
-  shell: "opatch lsinventory"
-  environment: "{{ env }}"
-  register: opatchls
-
-- debug: var=opatchls.stdout_lines
