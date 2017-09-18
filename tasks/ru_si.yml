@@ -68,12 +68,6 @@
   environment: "{{ env }}"
   with_items: "{{ dblist.stdout_lines }}"
 
-- name: RU SU | 12.1 - startup pluggable databases
-  shell: export ORACLE_SID={{ item }}; echo "alter pluggable database all open;" | sqlplus / as sysdba
-  environment: "{{ env }}"
-  with_items: "{{ dblist.stdout_lines }}"
-  when: oracle_version == '12.1.0.2'
-
 - name: RU SU | Load Modified SQL Files into the Database
   include: run_catbundle.yml
   tags: catbundle
