@@ -1,13 +1,10 @@
 ---
-env:
-  ORACLE_HOME: "{{ oracle_home }}"
-  ORACLE_BASE: "{{ oracle_base }}"
-  TNS_ADMIN: "{{ tns_admin }}"
-  PATH: "{{ oracle_home }}/bin:{{ oracle_home }}/OPatch:$PATH:/bin:/usr/bin::/usr/ccs/bin"
-
 # Latest opatch versions and files.
 # Files should exist in path defined by oracle_stage_install.
 opatch:
+  19.0.0:
+    version: 12.2.0.1.17
+    filename: p6880880_190000_Linux-x86-64.zip
   12.2.0.1:
     version: 12.2.0.1.9
     filename: p6880880_122010_Linux-x86-64.zip
@@ -21,40 +18,39 @@ opatch:
 quarterly_patches:
   # Release Update Patch for 12.2
   ru:
+    19.0.0:
+      JUL2019:
+        filename: p29708769_190000_Linux-x86-64.zip
+        patchid: 29708769
+
     12.2.0.1:
+      APR2019:
+        patchversion: 12.2.0.1.190416
+        filename: p29301687_122010_Linux-x86-64.zip
+        patchid: 29301687
+        si_patchid: 29314339
+
       JUL2017:
         patchversion: 12.2.0.1.170718
         filename: p26133434_122010_Linux-x86-64.zip
         patchid: 26133434
         si_patchid: 26123830
 
-  # Database Proactive Patch for 12.1
-  dbbp:
-    12.1.0.2:
-      JUL2017:
-        patchversion: 12.1.0.2.170718
-        filename: p26022196_121020_Linux-x86-64.zip
-        patchid: 26022196
-        si_patchid: 25869760
-      APR2017:
-        patchversion: 12.1.0.2.170418
-        filename: p25433352_121020_Linux-x86-64.zip
-        patchid: 25433352
-        si_patchid: 25397136
-      JUL2016:
-        patchversion: 12.1.0.2.160719
-        filename: p23273686_121020_Linux-x86-64.zip
-        patchid: 23273686
-        si_patchid: 23144544
-      APR2016:
-        patchversion: 12.1.0.2.160419
-        filename: p22899531_121020_Linux-x86-64.zip
-        patchid: 22899531
-        si_patchid: 22806133
 
   # PSU information for RAC and Single Instance (11.2 and 12.1)
   psu:
+    12.1.0.2:
+      APR2019:
+        patchversion: 12.1.0.2.190416
+        filename: p29176115_121020_Linux-x86-64.zip
+        patchid: 29176115
+        si_patchid: 29141015
     11.2.0.4:
+      JAN2019:
+        patchversion: 11.2.0.4.190115
+        filename: p28813878_112040_Linux-x86-64.zip
+        patchid: 28813878
+        si_patchid: 28729262
       JUL2017:
         patchversion: 11.2.0.4.170718
         filename: p26030799_112040_Linux-x86-64.zip

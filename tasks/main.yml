@@ -4,26 +4,29 @@
 
 - debug: var=patch_type
 
-- name: Run pre-check tasks
-  include: pre_checks.yml
-  tags: pre_checks
+# - name: Run pre-check tasks
+#   include: pre_checks.yml
+#   tags: pre_checks
 
 - name: Extract PSU and One-off patches
   include: extract_files.yml
   when: not rollback_psu
   tags: extract_files
 
-- name: Stop EM Agent
-  shell: "{{ agent_home }}/bin/emctl stop agent"
-  become_user: "{{ oracle_user }}"
-  when: agent_home is defined and shutdown_listener
-  tags: stop_agent
+
+# - name: Stop EM Agent
+#   shell: "{{ agent_home }}/bin/emctl stop agent"
+#   become_user: "{{ oracle_user }}"
+#   when: agent_home is defined and shutdown_listener
+#   tags: stop_agent
 
 - name: Apply Quarterly Patch
   include: "{{ patch_type }}_{{ oracle_install_type }}.yml"
   become_user: "{{ oracle_user }}"
   when: not rollback_psu
   tags: apply
+
+- fail:
 
 - name: Rollback Quarterly Patch
   include: "rollback_{{ oracle_install_type }}.yml"
