@@ -1,0 +1,10 @@
+---
+- debug: msg="ru_si_asm.19.0.0.yml - Patch Single Instance ASM (Oracle Restart)"
+
+- name: SI (ASM) | Patch GI  and Database Homes
+  shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}"
+  register: gi_opatchauto
+  when:
+    - oracle_version == gi_version
+
+- debug: var=gi_opatchauto

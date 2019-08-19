@@ -8,6 +8,8 @@
     group: "{{ oracle_group }}"
   run_once: true
 
+- debug: var=quarterly_patches[patch_type][oracle_version][patch_name].filename
+
 - name: Copy quarterly patch from S3
   aws_s3:
     bucket: cru-oracle-install

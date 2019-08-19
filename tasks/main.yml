@@ -1,18 +1,12 @@
 ---
-  #role: psu-apply
-  #file: main.yml
+  #role: ansible-oracle-psu
 
 - debug: var=patch_type
-
-# - name: Run pre-check tasks
-#   include: pre_checks.yml
-#   tags: pre_checks
 
 - name: Extract PSU and One-off patches
   include: extract_files.yml
   when: not rollback_psu
   tags: extract_files
-
 
 # - name: Stop EM Agent
 #   shell: "{{ agent_home }}/bin/emctl stop agent"
@@ -21,12 +15,10 @@
 #   tags: stop_agent
 
 - name: Apply Quarterly Patch
-  include: "{{ patch_type }}_{{ oracle_install_type }}.yml"
+  include: "{{ patch_type }}_{{ oracle_install_type }}.{{ oracle_version }}.yml"
   become_user: "{{ oracle_user }}"
   when: not rollback_psu
   tags: apply
-
-- fail:
 
 - name: Rollback Quarterly Patch
   include: "rollback_{{ oracle_install_type }}.yml"
@@ -34,20 +26,9 @@
   when: rollback_psu
   tags: rollback
 
-- name: Start EM Agent
-  shell: "{{ agent_home }}/bin/emctl start agent"
-  become: yes
-  become_user: "{{ oracle_user }}"
-  when: agent_home is defined and shutdown_listener
-  tags: start_agent
-
-- name: Opatch lsinventory
-  shell: "{{ oracle_home }}/OPatch/opatch lsinventory -oh {{ oracle_home }}"
-  become_user: "{{ oracle_user }}"
-  with_items:
-    - "{{ oracle_home }}"
-    - "{{ grid_home|default(None) }}"
-  when: item is defined
-  register: lsinv_post
-
-- debug: var=lsinv_post.results
+# - name: Start EM Agent
+#   shell: "{{ agent_home }}/bin/emctl start agent"
+#   become: yes
+#   become_user: "{{ oracle_user }}"
+#   when: agent_home is defined and shutdown_listener
+#   tags: start_agent

@@ -9,8 +9,8 @@ opatch:
     version: 12.2.0.1.9
     filename: p6880880_122010_Linux-x86-64.zip
   12.1.0.2:
-    version: 12.2.0.1.9
-    filename: p6880880_122010_Linux-x86-64.zip
+    version: 12.2.0.1.17
+    filename: p6880880_121010_Linux-x86-64.zip
   11.2.0.4:
     version: 11.2.0.3.12
     filename: p6880880_112000_Linux-x86-64.zip
@@ -23,19 +23,12 @@ quarterly_patches:
         filename: p29708769_190000_Linux-x86-64.zip
         patchid: 29708769
 
-    12.2.0.1:
-      APR2019:
-        patchversion: 12.2.0.1.190416
-        filename: p29301687_122010_Linux-x86-64.zip
-        patchid: 29301687
-        si_patchid: 29314339
-
+  dbbp:
+    12.1.0.2:
       JUL2017:
-        patchversion: 12.2.0.1.170718
-        filename: p26133434_122010_Linux-x86-64.zip
-        patchid: 26133434
-        si_patchid: 26123830
-
+        patchversion: 12.1.0.2.170718
+        filename: p26022196_121020_Linux-x86-64.zip
+        patchid: 26022196
 
   # PSU information for RAC and Single Instance (11.2 and 12.1)
   psu:
