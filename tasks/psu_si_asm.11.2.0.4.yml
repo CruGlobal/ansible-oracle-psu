@@ -1,0 +1,68 @@
+---
+- debug: msg="Patch 11.2.0.4 Single Instance ASM (Oracle Restart)"
+
+- name: Check if patch is applied
+  shell: "{{ oracle_home }}/OPatch/opatch lspatches"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: opatch_lspatches
+
+- debug: var=opatch_lspatches
+
+- block:
+
+    - name: srvctl stop home
+      shell: "{{ oracle_home }}/bin/srvctl stop home -o {{ oracle_home }} -s {{ patch_directory }}/11g_srvctl.state -f"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+
+    - name: SI (ASM) | Patch 11.2 Database Home
+      shell: "{{ oracle_home }}/OPatch/opatch apply -silent -force {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }} -oh {{ oracle_home }} -ocmrf {{ patch_directory }}/ocm.rsp"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: psu_opatch_apply
+
+    - debug: var=psu_opatch_apply.stdout_lines
+
+    #Apply PSU one-off patches
+    - name: Template patch list
+      template:
+        src: patch_list.j2
+        dest: "{{ patch_directory }}/patch_list.txt"
+        owner: "{{ oracle_user }}"
+        group: "{{ oracle_group }}"
+      when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+    - name: Opatch prereq check for oneoff patches
+      shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_conflicts_psu
+      when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+    - debug: var=oneoff_conflicts_psu.stdout_lines
+      when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+    - name: Apply one-off patches
+      shell: opatch napply -silent -skip_subset -skip_duplicate -ocmrf {{ patch_directory }}/ocm.rsp -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_apply_psu
+      when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+    - debug: var=oneoff_apply_psu.stdout_lines
+      when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+
+    - name: srvctl start home
+      shell: "{{ oracle_home }}/bin/srvctl start home -o {{ oracle_home }} -s {{ patch_directory }}/11g_srvctl.state"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      tags: startup_11g
+
+    - name: remove state file
+      file:
+        path: "{{ patch_directory }}/11g_srvctl.state"
+        state: absent
+      tags: 11g_cleanup
+
+  when: not opatch_lspatches.stdout is search('{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}')

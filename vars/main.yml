@@ -38,67 +38,19 @@ quarterly_patches:
         filename: p29176115_121020_Linux-x86-64.zip
         patchid: 29176115
         si_patchid: 29141015
+
     11.2.0.4:
       JAN2019:
         patchversion: 11.2.0.4.190115
         filename: p28813878_112040_Linux-x86-64.zip
         patchid: 28813878
         si_patchid: 28729262
+      JAN2018:
+        patchversion: 11.2.0.4.180116
+        filename: p26925576_112040_Linux-x86-64.zip
+        patchid: 26925576
       JUL2017:
         patchversion: 11.2.0.4.170718
         filename: p26030799_112040_Linux-x86-64.zip
         patchid: 26030799
         si_patchid: 25869727
-
-oneoff_patches:
-  # 12.1.0.2:
-    # - patchid: 21091518   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-    #   filename: p21091518_121020_Linux-x86-64.zip
-    # - patchid: 20879889   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-    #   filename: p20879889_121020_Linux-x86-64.zip
-
-#PSU version specific patches
-  # 12.1.0.2.160419:
-    # - patchid: 21091518   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-    #   filename: p21091518_121020_Linux-x86-64.zip
-    # - patchid: 20807398   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-    #   filename: p20807398_12102160419_Linux-x86-64.zip
-
-
-  12.1.0.2.160119:
-    - patchid: 21091518   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-      filename: p21091518_121020_Linux-x86-64.zip
-    - patchid: 20879889   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-      filename: p20879889_121020_Linux-x86-64.zip
-    - patchid: 13542050   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-      filename: p13542050_121024_Linux-x86-64.zip
-    - patchid: 21869620   # Merge request for bugs 19509982 20807398
-      filename: p21869620_121025_Linux-x86-64.zip
-    - patchid: 22965605   # MERGE REQUEST ON TOP OF DATABASE PSU 12.1.0.2.5 FOR BUGS 21869620 18302923
-      filename: p22965605_121025_Linux-x86-64.zip
-
-
-  12.1.0.2.5:
-    - patchid: 21091518   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-      filename: p21091518_121020_Linux-x86-64.zip
-    - patchid: 20879889   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-      filename: p20879889_121020_Linux-x86-64.zip
-    - patchid: 13542050   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-      filename: p13542050_121024_Linux-x86-64.zip
-    - patchid: 21869620   # Merge request for bugs 19509982 20807398
-      filename: p21869620_121025_Linux-x86-64.zip
-
-  12.1.0.2.4:
-    - patchid: 13542050   # Avoid Poor Performance or Wrong Results on 12.1.0.2 (Doc ID 2034610.1)
-      filename: p13542050_121024_Linux-x86-64.zip
-    - patchid: 21800251 # only needed up to version 12.1.0.2.4
-      filename: p21800251_121020_Linux-x86-64.zip
-    - patchid: 21821738 #Merge request for bugs 21821738 18485835
-      filename: p21821738_121020_Linux-x86-64.zip
-
-  11.2.0.4.8:
-    - patchid: 17890099 # ORA-2072 AND ORA-2063 ON QUERY VIA DBLINK
-      filename: p17890099_112048_Linux-x86-64.zip
-  11.2.0.4.7:
-    - patchid: 17890099 # ORA-2072 AND ORA-2063 ON QUERY VIA DBLINK
-      filename: p17890099_112047_Linux-x86-64.zip

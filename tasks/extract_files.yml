@@ -53,14 +53,31 @@
     group: "{{ oracle_group }}"
   when: oracle_version == gi_version
 
-# - name: Unzip oneoff patches
-#   unarchive:
-#     src: "{{ oracle_stage_install }}/{{ item.filename }}"
-#     dest: "{{ patch_directory }}/"
-#     copy: no
-#     creates: "{{ patch_directory }}/{{ item.patchid }}/README.txt"
-#     owner: "{{ oracle_user }}"
-#     group: "{{ oracle_group }}"
-#   with_items: "{{ oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ]|default([]) }}"
-#   when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined and not ansible_check_mode
-#   run_once: true
+- name: Copy ocm response file
+  aws_s3:
+    bucket: cru-oracle-install
+    object: ocm.rsp
+    dest: "{{ patch_directory}}/ocm.rsp"
+    mode: get
+    overwrite: never
+
+- name: Copy oneoff patches from S3
+  aws_s3:
+    bucket: cru-oracle-install
+    object: "{{ item.filename }}"
+    dest: "{{ patch_directory}}/{{ item.filename }}"
+    mode: get
+    overwrite: never
+  with_items: "{{ oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ]|default([]) }}"
+  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined and not ansible_check_mode
+
+- name: Unzip oneoff patches
+  unarchive:
+    src: "{{ patch_directory }}/{{ item.filename }}"
+    dest: "{{ patch_directory }}/"
+    copy: no
+    creates: "{{ patch_directory }}/{{ item.patchid }}/README.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  with_items: "{{ oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ]|default([]) }}"
+  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined and not ansible_check_mode
