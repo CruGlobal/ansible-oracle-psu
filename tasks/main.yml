@@ -20,11 +20,11 @@
   when: not rollback_psu
   tags: apply
 
-- name: Rollback Quarterly Patch
-  include: "rollback_{{ oracle_install_type }}.yml"
-  become_user: "{{ oracle_user }}"
-  when: rollback_psu
-  tags: rollback
+# - name: Rollback Quarterly Patch
+#   include: "rollback_{{ oracle_install_type }}.yml"
+#   become_user: "{{ oracle_user }}"
+#   when: rollback_psu
+#   tags: rollback
 
 # - name: Start EM Agent
 #   shell: "{{ agent_home }}/bin/emctl start agent"
