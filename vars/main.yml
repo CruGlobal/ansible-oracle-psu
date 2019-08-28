@@ -20,6 +20,7 @@ quarterly_patches:
   ru:
     19.0.0:
       JUL2019:
+        patchversion: 19.4.0.0.190716
         filename: p29708769_190000_Linux-x86-64.zip
         patchid: 29708769
 
