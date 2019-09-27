@@ -17,7 +17,7 @@
       become_user: "{{ oracle_user }}"
 
     - name: SI (ASM) | Patch 11.2 Database Home
-      shell: "{{ oracle_home }}/OPatch/opatch apply -silent -force {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }} -oh {{ oracle_home }} -ocmrf {{ patch_directory }}/ocm.rsp"
+      shell: "{{ oracle_home }}/OPatch/opatch apply -silent -force {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].si_patchid }} -oh {{ oracle_home }} -ocmrf {{ patch_directory }}/ocm.rsp"
       environment: "{{ env }}"
       become_user: "{{ oracle_user }}"
       register: psu_opatch_apply
