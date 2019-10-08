@@ -3,10 +3,16 @@
 
 - debug: var=patch_type
 
+- debug: var=patch_id
+
 - name: Extract PSU and One-off patches
   include: extract_files.yml
-  when: not rollback_psu
   tags: extract_files
+
+- name: Update opatch
+  include: update_opatch.yml
+  tags: update_opatch
+
 
 # - name: Stop EM Agent
 #   shell: "{{ agent_home }}/bin/emctl stop agent"
@@ -15,11 +21,13 @@
 #   tags: stop_agent
 
 - name: Apply Quarterly Patch
-  include: "{{ patch_type }}_{{ oracle_install_type }}.{{ oracle_version }}.yml"
+  include: "{{ oracle_install_type }}.{{ oracle_version }}.yml"
   become_user: "{{ oracle_user }}"
   when: not rollback_psu
   tags: apply
 
+- pause:
+  
 # - name: Rollback Quarterly Patch
 #   include: "rollback_{{ oracle_install_type }}.yml"
 #   become_user: "{{ oracle_user }}"

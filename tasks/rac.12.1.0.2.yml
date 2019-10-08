@@ -1,0 +1,39 @@
+---
+- debug: msg="dbbp_si_asm.12.1.0.2.yml - Patch 12.1.0.2 Single Instance ASM (Oracle Restart)"
+
+- name: RAC | Patch 19c GI and Database Homes
+  shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }} -analyze"
+  register: prereq_check
+
+- debug: var=prereq_check.stdout_lines
+
+- block:
+    - name: SI (ASM) | Patch 12.1 Database Home
+      shell: "{{ oracle_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }} -oh {{ oracle_home }}"
+      register: dbbp_opatchauto
+
+    - debug: var=dbbp_opatchauto.stdout_lines
+
+    - name: Verify services are online
+      shell: "{{ gi_home }}/bin/crsctl stat res -t"
+      become_user: "{{ oracle_user }}"
+
+    - debug: var=stat_res_t.stdout_lines
+
+  when: is_master
+
+
+- block:
+    - name: SI (ASM) | Patch 12.1 Database Home
+      shell: "{{ oracle_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }} -oh {{ oracle_home }}"
+      register: dbbp_opatchauto
+
+    - debug: var=dbbp_opatchauto.stdout_lines
+
+    - name: Verify services are online
+      shell: "{{ gi_home }}/bin/crsctl stat res -t"
+      become_user: "{{ oracle_user }}"
+
+    - debug: var=stat_res_t.stdout_lines
+
+  when: not is_master

@@ -12,46 +12,81 @@ opatch:
     version: 12.2.0.1.17
     filename: p6880880_121010_Linux-x86-64.zip
   11.2.0.4:
-    version: 11.2.0.3.12
+    version: 11.2.0.3.21
     filename: p6880880_112000_Linux-x86-64.zip
 
+
 quarterly_patches:
-  # Release Update Patch for 12.2
-  ru:
-    19.0.0:
-      JUL2019:
-        patchversion: 19.4.0.0.190716
-        filename: p29708769_190000_Linux-x86-64.zip
-        patchid: 29708769
+  # 19.0.0:
 
-  dbbp:
-    12.1.0.2:
-      JUL2017:
-        patchversion: 12.1.0.2.170718
-        filename: p26022196_121020_Linux-x86-64.zip
-        patchid: 26022196
+  "29708769":
+    #Grid Infrastructure Release Update 19.4.0
+    patchversion: 19.4.0.0.190716
+    filename: p29708769_190000_Linux-x86-64.zip
 
-  # PSU information for RAC and Single Instance (11.2 and 12.1)
-  psu:
-    12.1.0.2:
-      APR2019:
-        patchversion: 12.1.0.2.190416
-        filename: p29176115_121020_Linux-x86-64.zip
-        patchid: 29176115
-        si_patchid: 29141015
 
-    11.2.0.4:
-      JAN2019:
-        patchversion: 11.2.0.4.190115
-        filename: p28813878_112040_Linux-x86-64.zip
-        patchid: 28813878
-        si_patchid: 28729262
-      JAN2018:
-        patchversion: 11.2.0.4.180116
-        filename: p26925576_112040_Linux-x86-64.zip
-        patchid: 26925576
-      JUL2017:
-        patchversion: 11.2.0.4.170718
-        filename: p26030799_112040_Linux-x86-64.zip
-        patchid: 26030799
-        si_patchid: 25869727
+  # 12.1.0.2:
+  "28349951":
+    #DATABASE PROACTIVE BUNDLE PATCH 12.1.0.2.181016 (includes DBBP 28259867 and OCW PSU 28259914)
+    patchversion: 12.1.0.2.181016
+    filename: p28349951_121020_Linux-x86-64.zip
+
+
+  # 11.2.0.4:
+
+  "25869727":
+    #DATABASE PATCH SET UPDATE 11.2.0.4.170718
+    patchversion: 11.2.0.4.170718
+    filename: p25869727_112040_Linux-x86-64.zip
+
+  "28204707":
+    #DATABASE PATCH SET UPDATE 11.2.0.4.181016
+    patchversion: 11.2.0.4.181016
+    filename: p28204707_112040_Linux-x86-64.zip
+
+  # ru:
+  #   19.0.0:
+  #     JUL2019:
+  #       patchversion: 19.4.0.0.190716
+  #       filename: p29708769_190000_Linux-x86-64.zip
+  #       patchid: 29708769
+  #
+  # dbbp:
+  #   12.1.0.2:
+  #     JUL2017:
+  #       patchversion: 12.1.0.2.170718
+  #       filename: p26022196_121020_Linux-x86-64.zip
+  #       patchid: 26022196
+  #
+  # # PSU information for RAC and Single Instance (11.2 and 12.1)
+  # psu:
+  #   12.1.0.2:
+  #     APR2019:
+  #       patchversion: 12.1.0.2.190416
+  #       filename: p29176115_121020_Linux-x86-64.zip
+  #       patchid: 29176115
+  #       si_patchid: 29141015
+  #
+  #   11.2.0.4:
+  #     JAN2019:
+  #       patchversion: 11.2.0.4.190115
+  #       filename: p28813878_112040_Linux-x86-64.zip
+  #       patchid: 28813878
+  #       si_patchid: 28729262
+  #
+  #     OCT2018:
+  #       patchversion: 11.2.0.4.181016
+  #       filename: p28204707_112040_Linux-x86-64.zip
+  #       patchid: 28204707
+  #       si_patchid:
+  #
+  #     JAN2018:
+  #       patchversion: 11.2.0.4.180116
+  #       filename: p26925576_112040_Linux-x86-64.zip
+  #       patchid: 26925576
+  #
+  #     JUL2017:
+  #       patchversion: 11.2.0.4.170718
+  #       filename: p26030799_112040_Linux-x86-64.zip
+  #       patchid: 26030799
+  #       si_patchid: 25869727
