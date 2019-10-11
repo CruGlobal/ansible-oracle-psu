@@ -1,7 +1,7 @@
 ---
 - debug: msg="dbbp_si_asm.12.1.0.2.yml - Patch 12.1.0.2 Single Instance ASM (Oracle Restart)"
 
-- name: RAC | Patch 19c GI and Database Homes
+- name: RAC | Patch 12c GI and Database Homes
   shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }} -analyze"
   register: prereq_check
 

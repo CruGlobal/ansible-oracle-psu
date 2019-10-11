@@ -26,8 +26,6 @@
   when: not rollback_psu
   tags: apply
 
-- pause:
-  
 # - name: Rollback Quarterly Patch
 #   include: "rollback_{{ oracle_install_type }}.yml"
 #   become_user: "{{ oracle_user }}"
