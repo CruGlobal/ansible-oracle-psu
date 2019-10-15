@@ -28,34 +28,36 @@
     - debug: var=psu_opatch_apply.stdout_lines
 
     #Apply PSU one-off patches
-    # - name: Template patch list
-    #   template:
-    #     src: patch_list.j2
-    #     dest: "{{ patch_directory }}/patch_list.txt"
-    #     owner: "{{ oracle_user }}"
-    #     group: "{{ oracle_group }}"
-    #   when: patch_level[oracle_version].oneoff_patches is defined
-    #
-    # - name: Opatch prereq check for oneoff patches
-    #   shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
-    #   environment: "{{ env }}"
-    #   become_user: "{{ oracle_user }}"
-    #   register: oneoff_conflicts_psu
-    #   when: patch_level[oracle_version].oneoff_patches is defined
-    #
-    # - debug: var=oneoff_conflicts_psu.stdout_lines
-    #   when: patch_level[oracle_version].oneoff_patches is defined
-    #
-    # - name: Apply one-off patches
-    #   shell: opatch napply -silent -skip_subset -skip_duplicate -ocmrf {{ patch_directory }}/ocm.rsp -phBaseFile {{ patch_directory }}/patch_list.txt
-    #   environment: "{{ env }}"
-    #   become_user: "{{ oracle_user }}"
-    #   register: oneoff_apply_psu
-    #   when: patch_level[oracle_version].oneoff_patches is defined
-    #   ignore_errors: true
-    #
-    # - debug: var=oneoff_apply_psu.stdout_lines
-    #   when: patch_level[oracle_version].oneoff_patches is defined
+    - name: Template patch list
+      template:
+        src: patch_list.j2
+        dest: "{{ patch_directory }}/patch_list.txt"
+        owner: "{{ oracle_user }}"
+        group: "{{ oracle_group }}"
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: Opatch prereq check for oneoff patches
+      shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_conflicts_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - debug: var=oneoff_conflicts_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+
+    - name: Apply one-off patches
+      shell: opatch napply -silent -ocmrf {{ patch_directory }}/ocm.rsp -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_apply_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+      ignore_errors: true
+
+    - debug: var=oneoff_apply_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+      ignore_errors: true
 
     - name: srvctl start home
       shell: "{{ oracle_home }}/bin/srvctl start home -n {{ ansible_hostname }} -o {{ oracle_home }} -s {{ patch_directory }}/11g_srvctl.state"
@@ -87,34 +89,35 @@
     - debug: var=psu_opatch_apply.stdout_lines
 
     #Apply PSU one-off patches
-    # - name: Template patch list
-    #   template:
-    #     src: patch_list.j2
-    #     dest: "{{ patch_directory }}/patch_list.txt"
-    #     owner: "{{ oracle_user }}"
-    #     group: "{{ oracle_group }}"
-    #   when: patch_level[oracle_version].oneoff_patches is defined
-    #
-    # - name: Opatch prereq check for oneoff patches
-    #   shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
-    #   environment: "{{ env }}"
-    #   become_user: "{{ oracle_user }}"
-    #   register: oneoff_conflicts_psu
-    #   when: patch_level[oracle_version].oneoff_patches is defined
-    #
-    # - debug: var=oneoff_conflicts_psu.stdout_lines
-    #   when: patch_level[oracle_version].oneoff_patches is defined
-    #
-    # - name: Apply one-off patches
-    #   shell: opatch napply -silent -skip_subset -skip_duplicate -ocmrf {{ patch_directory }}/ocm.rsp -phBaseFile {{ patch_directory }}/patch_list.txt
-    #   environment: "{{ env }}"
-    #   become_user: "{{ oracle_user }}"
-    #   register: oneoff_apply_psu
-    #   when: patch_level[oracle_version].oneoff_patches is defined
-    #   ignore_errors: true
-    #
-    # - debug: var=oneoff_apply_psu.stdout_lines
-    #   when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+    - name: Template patch list
+      template:
+        src: patch_list.j2
+        dest: "{{ patch_directory }}/patch_list.txt"
+        owner: "{{ oracle_user }}"
+        group: "{{ oracle_group }}"
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: Opatch prereq check for oneoff patches
+      shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_conflicts_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - debug: var=oneoff_conflicts_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: Apply one-off patches
+      shell: opatch napply -silent -ocmrf {{ patch_directory }}/ocm.rsp -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_apply_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+      ignore_errors: true
+
+    - debug: var=oneoff_apply_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+      ignore_errors: true
 
     - name: srvctl start home
       shell: "{{ oracle_home }}/bin/srvctl start home -n {{ ansible_hostname }} -o {{ oracle_home }} -s {{ patch_directory }}/11g_srvctl.state"
