@@ -43,3 +43,8 @@ quarterly_patches:
     #DATABASE PATCH SET UPDATE 11.2.0.4.181016
     patchversion: 11.2.0.4.181016
     filename: p28204707_112040_Linux-x86-64.zip
+
+  "28429134":
+    #Grid PATCH SET UPDATE 11.2.0.4.181016
+    patchversion: 11.2.0.4.181016
+    filename: p28429134_112040_Linux-x86-64.zip
