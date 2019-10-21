@@ -1,0 +1,45 @@
+---
+- debug: msg="ru_rac.19.0.0.yml - Patch RAC GI Home and DB Home(s)"
+
+# - name: Opatchauto Analyze
+#   shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }} -analyze"
+#   register: prereq_check
+#
+# - debug: var=prereq_check.stdout_lines
+
+- block:
+    - name: RAC | Patch 19c GI and Database Homes
+      shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }}"
+      register: gi_opatchauto
+
+    - debug: var=gi_opatchauto.stdout_lines
+
+    - name: Verify services are online
+      shell: "{{ gi_home }}/bin/crsctl stat res -t"
+      become_user: "{{ oracle_user }}"
+      register: stat_res_t
+
+    - debug: var=stat_res_t.stdout_lines
+    #
+    # - name: Pause after first node
+    #   pause: prompt="Verify everything's running on the first node."
+
+  when: is_master
+
+
+
+- block:
+    - name: RAC | Patch 19c GI and Database Homes
+      shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }}"
+      register: gi_opatchauto
+
+    - debug: var=gi_opatchauto.stdout_lines
+
+    - name: Verify services are online
+      shell: "{{ gi_home }}/bin/crsctl stat res -t"
+      become_user: "{{ oracle_user }}"
+      register: stat_res_t
+
+    - debug: var=stat_res_t.stdout_lines
+
+  when: not is_master

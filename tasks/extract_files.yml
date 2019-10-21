@@ -6,24 +6,22 @@
     state: directory
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
-  run_once: true
 
-- debug: var=quarterly_patches[patch_type][oracle_version][patch_name].filename
+- debug: var=quarterly_patches[patch_id].filename
 
 - name: Copy quarterly patch from S3
   aws_s3:
     bucket: cru-oracle-install
-    object: "{{ quarterly_patches[patch_type][oracle_version][patch_name].filename }}"
-    dest: "{{ patch_directory}}/{{ quarterly_patches[patch_type][oracle_version][patch_name].filename }}"
+    object: "{{ quarterly_patches[patch_id].filename }}"
+    dest: "{{ patch_directory}}/{{ quarterly_patches[patch_id].filename }}"
     mode: get
     overwrite: never
 
 - name: Unzip Quarterly Patch
   unarchive:
-    src: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].filename }}"
+    src: "{{ patch_directory }}/{{ quarterly_patches[patch_id].filename }}"
     dest: "{{ patch_directory}}/"
     copy: no
-    # creates: "{{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }}/"
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
   when: not ansible_check_mode
@@ -36,23 +34,6 @@
     mode: get
     overwrite: never
 
-- name: Update opatch in database home
-  unarchive:
-    src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
-    dest: "{{ oracle_home }}"
-    copy: no
-    owner: "{{ oracle_user }}"
-    group: "{{ oracle_group }}"
-
-- name: Update opatch in grid home
-  unarchive:
-    src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
-    dest: "{{ gi_home }}"
-    copy: no
-    owner: "{{ oracle_user }}"
-    group: "{{ oracle_group }}"
-  when: oracle_version == gi_version
-
 - name: Copy ocm response file
   aws_s3:
     bucket: cru-oracle-install
@@ -60,6 +41,7 @@
     dest: "{{ patch_directory}}/ocm.rsp"
     mode: get
     overwrite: never
+  when: oracle_version == '11.2.0.4'
 
 - name: Copy oneoff patches from S3
   aws_s3:
@@ -68,16 +50,16 @@
     dest: "{{ patch_directory}}/{{ item.filename }}"
     mode: get
     overwrite: never
-  with_items: "{{ oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ]|default([]) }}"
-  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined and not ansible_check_mode
+  with_items: "{{ patch_level[oracle_version].oneoff_patches | default([]) }}"
+  when: patch_level[oracle_version].oneoff_patches is defined and not ansible_check_mode
 
 - name: Unzip oneoff patches
   unarchive:
     src: "{{ patch_directory }}/{{ item.filename }}"
     dest: "{{ patch_directory }}/"
     copy: no
-    creates: "{{ patch_directory }}/{{ item.patchid }}/README.txt"
+    creates: "{{ patch_directory }}/{{ item.patch_id }}/README.txt"
     owner: "{{ oracle_user }}"
     group: "{{ oracle_group }}"
-  with_items: "{{ oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ]|default([]) }}"
-  when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined and not ansible_check_mode
+  with_items: "{{ patch_level[oracle_version].oneoff_patches | default([]) }}"
+  when: patch_level[oracle_version].oneoff_patches is defined and not ansible_check_mode

@@ -1,0 +1,130 @@
+---
+
+# apply bundle patch on master node
+- block:
+    - name: RAC | Patch 12.1 Database Home Node 1
+      shell: "{{ oracle_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }} -oh {{ oracle_home }}"
+      register: dbbp_opatchauto
+
+    - debug: var=dbbp_opatchauto.stdout_lines
+
+    - name: Verify services are online
+      shell: "{{ gi_home }}/bin/crsctl stat res -t"
+      become_user: "{{ oracle_user }}"
+
+    - debug: var=stat_res_t.stdout_lines
+
+  when: is_master
+
+# apply bundle patch on other nodes
+- block:
+    - name: RAC | Patch 12.1 Database Home Node 2
+      shell: "{{ oracle_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }} -oh {{ oracle_home }}"
+      register: dbbp_opatchauto
+
+    - debug: var=dbbp_opatchauto.stdout_lines
+
+    - name: Verify services are online
+      shell: "{{ gi_home }}/bin/crsctl stat res -t"
+      become_user: "{{ oracle_user }}"
+
+    - debug: var=stat_res_t.stdout_lines
+
+  when: not is_master
+
+
+# apply one off patches on master node
+- block:
+    - name: RAC | Stop 12.1 Home before one-off patches
+      shell: "{{ oracle_home }}/bin/srvctl stop home -n {{ ansible_hostname }} -o {{ oracle_home }} -s {{ patch_directory }}/12c_srvctl.state -f"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+
+    - name: RAC | 12.1 Template patch list
+      template:
+        src: patch_list.j2
+        dest: "{{ patch_directory }}/patch_list.txt"
+        owner: "{{ oracle_user }}"
+        group: "{{ oracle_group }}"
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: RAC | 12.1 Opatch prereq check for oneoff patches
+      shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_conflicts_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - debug: var=oneoff_conflicts_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: Apply one-off patches
+      shell: opatch napply -silent -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_apply_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+      ignore_errors: true
+
+    - debug: var=oneoff_apply_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: RAC | Start 12.1 Home after one-off patches
+      shell: "{{ oracle_home }}/bin/srvctl start home -n {{ ansible_hostname }} -o {{ oracle_home }} -s {{ patch_directory }}/12c_srvctl.state"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+
+    - name: RAC | 12.1 Remove state file
+      file:
+        path: "{{ patch_directory }}/12c_srvctl.state"
+        state: absent
+
+  when: is_master
+
+# apply one off patches on other nodes
+- block:
+    - name: RAC | Stop 12.1 Home before one-off patches
+      shell: "{{ oracle_home }}/bin/srvctl stop home -n {{ ansible_hostname }} -o {{ oracle_home }} -s {{ patch_directory }}/12c_srvctl.state -f"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+
+    - name: RAC | 12.1 Template patch list
+      template:
+        src: patch_list.j2
+        dest: "{{ patch_directory }}/patch_list.txt"
+        owner: "{{ oracle_user }}"
+        group: "{{ oracle_group }}"
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: RAC | 12.1 Opatch prereq check for oneoff patches
+      shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_conflicts_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - debug: var=oneoff_conflicts_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: Apply one-off patches
+      shell: opatch napply -silent -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_apply_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+      ignore_errors: true
+
+    - debug: var=oneoff_apply_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: RAC | Start 12.1 Home after one-off patches
+      shell: "{{ oracle_home }}/bin/srvctl start home -n {{ ansible_hostname }} -o {{ oracle_home }} -s {{ patch_directory }}/12c_srvctl.state"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+
+    - name: RAC | 12.1 Remove state file
+      file:
+        path: "{{ patch_directory }}/12c_srvctl.state"
+        state: absent
+
+  when: not is_master

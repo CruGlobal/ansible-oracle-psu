@@ -1,0 +1,42 @@
+---
+
+- name: Check opatch version in database home
+  shell: "{{ oracle_home }}/OPatch/opatch version"
+  register: database_opatch_version
+  environment:
+    ORACLE_HOME: "{{ oracle_home }}"
+  changed_when: False
+
+- debug: var=database_opatch_version
+
+- name: Update opatch in database home
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
+    dest: "{{ oracle_home }}"
+    remote_src: yes
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  when: opatch[oracle_version].version not in  database_opatch_version.stdout
+
+
+- name: Check opatch version in grid home
+  shell: "{{ gi_home }}/OPatch/opatch version"
+  register: grid_opatch_version
+  environment:
+    ORACLE_HOME: "{{ gi_home }}"
+  when: oracle_version == gi_version
+  changed_when: False
+
+- debug: var=grid_opatch_version
+  when: oracle_version == gi_version
+
+- name: Update opatch in grid home
+  unarchive:
+    src: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
+    dest: "{{ gi_home }}"
+    remote_src: yes
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  when:
+    - oracle_version == gi_version
+    - opatch[oracle_version].version not in  grid_opatch_version.stdout

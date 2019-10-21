@@ -2,7 +2,7 @@
 - debug: msg="dbbp_si_asm.12.1.0.2.yml - Patch 12.1.0.2 Single Instance ASM (Oracle Restart)"
 
 - name: SI (ASM) | Patch 12.1 Database Home
-  shell: "{{ oracle_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ quarterly_patches[patch_type][oracle_version][patch_name].patchid }} -oh {{ oracle_home }}"
+  shell: "{{ oracle_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }} -oh {{ oracle_home }}"
   register: dbbp_opatchauto
 
 - debug: var=dbbp_opatchauto.stdout_lines

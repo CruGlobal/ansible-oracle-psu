@@ -1,0 +1,198 @@
+---
+- debug: msg="Patch 11.2.0.4 Single Instance ASM (Oracle Restart)"
+
+- name: Check if patch is applied
+  shell: "{{ oracle_home }}/OPatch/opatch lspatches"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: opatch_lspatches
+
+- debug: var=opatch_lspatches
+
+
+- debug: msg="{{ patch_level[oracle_version].oneoff_patches }}"
+
+- set_fact:
+     db_patch_id: "{{ patch_level[oracle_version].db_patch_id }}"
+     ocw_patch_id: "{{ patch_level[oracle_version].ocw_patch_id }}"
+
+
+- block:
+    - name: srvctl stop home
+      shell: "{{ oracle_home }}/bin/srvctl stop home -n {{ ansible_hostname }} -o {{ oracle_home }} -s {{ patch_directory }}/11g_srvctl.state -f"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+
+    - name: RAC (ASM) | Patch 11.2 Database Home
+      shell: "{{ oracle_home }}/OPatch/opatch apply -silent -force {{ patch_directory }}/{{ patch_id }}/{{ db_patch_id }} -oh {{ oracle_home }} -ocmrf {{ patch_directory }}/ocm.rsp"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: psu_opatch_apply
+
+    # Debug may show ignorable warning: "warning: -z lazyload ignored" and "warning: -z nolazyload ignored" During Install or Patching in 11.2.0.4 Database in OEL7/RHEL7 (Doc ID 2071922.1)
+    - debug: var=psu_opatch_apply.stdout_lines
+
+    # Apply OCW Patch
+    - name: Set permissions on prepatch and postpatch scripts
+      file:
+        dest: "{{ patch_directory }}/{{ patch_id }}/{{ ocw_patch_id }}/custom/scripts/{{ item }}"
+        mode: a+x
+      with_items:
+        - prepatch.sh
+        - postpatch.sh
+
+    - name: run prepatch.sh
+      shell: "{{ patch_directory }}/{{ patch_id }}/{{ ocw_patch_id }}/custom/scripts/prepatch.sh -dbhome {{ oracle_home }}"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      ignore_errors: true
+      register: prepatch
+
+    - debug: var=prepatch
+
+    - name: RAC (ASM) | Apply OCW Patch
+      shell: "{{ oracle_home }}/OPatch/opatch napply -silent -local {{ patch_directory }}/{{ patch_id }}/{{ ocw_patch_id }}/custom/server/{{ ocw_patch_id }} -oh {{ oracle_home }} -ocmrf {{ patch_directory }}/ocm.rsp"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: ocw_opatch_apply
+
+    - debug: var=ocw_opatch_apply.stdout_lines
+
+    - name: run postpatch.sh
+      shell: "{{ patch_directory }}/{{ patch_id }}/{{ ocw_patch_id }}/custom/scripts/postpatch.sh -dbhome {{ oracle_home }}"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+
+
+    #Apply PSU one-off patches
+    - name: Template patch list
+      template:
+        src: patch_list.j2
+        dest: "{{ patch_directory }}/patch_list.txt"
+        owner: "{{ oracle_user }}"
+        group: "{{ oracle_group }}"
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: Opatch prereq check for oneoff patches
+      shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_conflicts_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - debug: var=oneoff_conflicts_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+
+    - name: Apply one-off patches
+      shell: opatch napply -silent -ocmrf {{ patch_directory }}/ocm.rsp -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_apply_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+      ignore_errors: true
+
+    - debug: var=oneoff_apply_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+      ignore_errors: true
+
+    - name: srvctl start home
+      shell: "{{ oracle_home }}/bin/srvctl start home -n {{ ansible_hostname }} -o {{ oracle_home }} -s {{ patch_directory }}/11g_srvctl.state"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      tags: startup_11g
+
+    - name: remove state file
+      file:
+        path: "{{ patch_directory }}/11g_srvctl.state"
+        state: absent
+      tags: 11g_cleanup
+
+  when: (is_master) and (not opatch_lspatches.stdout is search(patch_id))
+
+- block:
+
+    - name: srvctl stop home
+      shell: "{{ oracle_home }}/bin/srvctl stop home -n {{ ansible_hostname }} -o {{ oracle_home }} -s {{ patch_directory }}/11g_srvctl.state -f"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+
+    - name: RAC (ASM) | Patch 11.2 Database Home
+      shell: "{{ oracle_home }}/OPatch/opatch apply -silent -force {{ patch_directory }}/{{ patch_id }}/{{ db_patch_id }} -oh {{ oracle_home }} -ocmrf {{ patch_directory }}/ocm.rsp"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: psu_opatch_apply
+
+    - debug: var=psu_opatch_apply.stdout_lines
+
+    # Apply OCW Patch
+    - name: Set permissions on prepatch and postpatch scripts
+      file:
+        dest: "{{ patch_directory }}/{{ patch_id }}/{{ ocw_patch_id }}/custom/scripts/{{ item }}"
+        mode: a+x
+      with_items:
+        - prepatch.sh
+        - postpatch.sh
+
+    - name: run prepatch.sh
+      shell: "{{ patch_directory }}/{{ patch_id }}/{{ ocw_patch_id }}/custom/scripts/prepatch.sh -dbhome {{ oracle_home }}"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+
+    - name: RAC (ASM) | Apply OCW Patch
+      shell: "{{ oracle_home }}/OPatch/opatch napply -silent -local {{ patch_directory }}/{{ patch_id }}/{{ ocw_patch_id }}/custom/server/{{ ocw_patch_id }} -oh {{ oracle_home }} -ocmrf {{ patch_directory }}/ocm.rsp"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: ocw_opatch_apply
+
+    - debug: var=ocw_opatch_apply.stdout_lines
+
+    - name: run postpatch.sh
+      shell: "{{ patch_directory }}/{{ patch_id }}/{{ ocw_patch_id }}/custom/scripts/postpatch.sh -dbhome {{ oracle_home }}"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+
+    #Apply PSU one-off patches
+    - name: Template patch list
+      template:
+        src: patch_list.j2
+        dest: "{{ patch_directory }}/patch_list.txt"
+        owner: "{{ oracle_user }}"
+        group: "{{ oracle_group }}"
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: Opatch prereq check for oneoff patches
+      shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_conflicts_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - debug: var=oneoff_conflicts_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+
+    - name: Apply one-off patches
+      shell: opatch napply -silent -ocmrf {{ patch_directory }}/ocm.rsp -phBaseFile {{ patch_directory }}/patch_list.txt
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      register: oneoff_apply_psu
+      when: patch_level[oracle_version].oneoff_patches is defined
+      ignore_errors: true
+
+    - debug: var=oneoff_apply_psu.stdout_lines
+      when: patch_level[oracle_version].oneoff_patches is defined
+      ignore_errors: true
+
+    - name: srvctl start home
+      shell: "{{ oracle_home }}/bin/srvctl start home -n {{ ansible_hostname }} -o {{ oracle_home }} -s {{ patch_directory }}/11g_srvctl.state"
+      environment: "{{ env }}"
+      become_user: "{{ oracle_user }}"
+      tags: startup_11g
+
+    - name: remove state file
+      file:
+        path: "{{ patch_directory }}/11g_srvctl.state"
+        state: absent
+      tags: 11g_cleanup
+
+  when: (not is_master) and (not opatch_lspatches.stdout is search(patch_id))
