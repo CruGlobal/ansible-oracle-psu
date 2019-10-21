@@ -28,30 +28,30 @@
     - name: Template patch list
       template:
         src: patch_list.j2
-        dest: "{{ patch_directory }}/one_offs/patch_list.txt"
+        dest: "{{ patch_directory }}/patch_list.txt"
         owner: "{{ oracle_user }}"
         group: "{{ oracle_group }}"
-      when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+      when: patch_level[oracle_version].oneoff_patches is defined
 
     - name: Opatch prereq check for oneoff patches
-      shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/one_offs/patch_list.txt
+      shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
       environment: "{{ env }}"
       become_user: "{{ oracle_user }}"
       register: oneoff_conflicts_psu
-      when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+      when: patch_level[oracle_version].oneoff_patches is defined
 
     - debug: var=oneoff_conflicts_psu.stdout_lines
-      when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+      when: patch_level[oracle_version].oneoff_patches is defined
 
     - name: Apply one-off patches
-      shell: opatch napply -silent -skip_subset -skip_duplicate -ocmrf {{ patch_directory }}/ocm.rsp -phBaseFile {{ patch_directory }}/one_offs/patch_list.txt
+      shell: opatch napply -silent -skip_subset -skip_duplicate -ocmrf {{ patch_directory }}/ocm.rsp -phBaseFile {{ patch_directory }}/patch_list.txt
       environment: "{{ env }}"
       become_user: "{{ oracle_user }}"
       register: oneoff_apply_psu
-      when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+      when: patch_level[oracle_version].oneoff_patches is defined
 
     - debug: var=oneoff_apply_psu.stdout_lines
-      when: oneoff_patches[ quarterly_patches[patch_type][oracle_version][patch_name].patchversion ] is defined
+      when: patch_level[oracle_version].oneoff_patches is defined
 
     - name: srvctl start home
       shell: "{{ oracle_home }}/bin/srvctl start home -o {{ oracle_home }} -s {{ patch_directory }}/11g_srvctl.state"
@@ -65,4 +65,4 @@
         state: absent
       tags: 11g_cleanup
 
-  when: not opatch_lspatches.stdout is search(patch_id)
+  # when: not opatch_lspatches.stdout is search(patch_id)
