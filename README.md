@@ -45,6 +45,13 @@ oneoff_patches:
 
 * agent_home: path to EM Agent home directory (ie /app/oracle/agent12c/agent_inst)
 
+## Adding New Patch
+* Download Patch and save to shared location.
+* Download latest versio of Opatch and save to shared location.
+* In `vars.yml`
+  * Update OPatch version in `opatch:` variable
+  * Add new patch to `quarterly_patches:` variable
+
 
 ## Example Playbook
 

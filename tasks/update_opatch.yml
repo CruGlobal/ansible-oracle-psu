@@ -6,6 +6,7 @@
   environment:
     ORACLE_HOME: "{{ oracle_home }}"
   changed_when: False
+  check_mode: no # always run this command even in check mode
 
 - debug: var=database_opatch_version
 
@@ -26,6 +27,7 @@
     ORACLE_HOME: "{{ gi_home }}"
   when: oracle_version == gi_version
   changed_when: False
+  check_mode: no
 
 - debug: var=grid_opatch_version
   when: oracle_version == gi_version

@@ -1,6 +1,36 @@
 ---
 - debug: msg="ru_si_asm.19.0.0.yml - Patch Single Instance ASM (Oracle Restart)"
 
+- debug: msg="{{ item.patch_id }}"
+  with_items: "{{ patch_level[oracle_version].oneoff_patches }}"
+
+- name: srvctl stop home
+  shell: "{{ oracle_home }}/bin/srvctl stop home -o {{ oracle_home }} -s {{ patch_directory }}/19c_srvctl.state -f"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  when: patch_level[oracle_version].oneoff_patches is defined
+  ignore_errors: true
+
+- name: Rollback one-off patches
+  shell: "opatch nrollback -silent -id {{ item.patch_id }}"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: oneoff_rollback_psu
+  when: patch_level[oracle_version].oneoff_patches is defined
+  with_items: "{{ patch_level[oracle_version].oneoff_patches }}"
+  ignore_errors: true
+
+- name: srvctl start home
+  shell: "{{ oracle_home }}/bin/srvctl start home -o {{ oracle_home }} -s {{ patch_directory }}/19c_srvctl.state"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  when: patch_level[oracle_version].oneoff_patches is defined
+
+- name: remove state file
+  file:
+    path: "{{ patch_directory }}/19c_srvctl.state"
+    state: absent
+
 - name: SI (ASM) | Patch 19c GI and Database Homes
   shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }}"
   register: gi_opatchauto
