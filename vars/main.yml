@@ -3,7 +3,7 @@
 # Files should exist in path defined by oracle_stage_install.
 opatch:
   19.0.0:
-    version: 12.2.0.1.17
+    version: 12.2.0.1.21
     filename: p6880880_190000_Linux-x86-64.zip
   12.2.0.1:
     version: 12.2.0.1.9
@@ -17,34 +17,43 @@ opatch:
 
 
 quarterly_patches:
-  # 19.0.0:
+# 19.0.0
+# GI RELEASE UPDATE 19.8.0.0.0 (July 2020 RU)
+  "31305339":
+    patchversion: 19.8.0.0.200714
+    filename: p31305339_190000_Linux-x86-64.zip
 
+
+  #GI RELEASE UPDATE 19.7.0.0.0 (April 2020 RU)
+  "30899722":
+    patchversion: 19.7.0.0.200414
+    filename: p30899722_190000_Linux-x86-64.zip
+
+  #Grid Infrastructure Release Update 19.4.0
   "29708769":
-    #Grid Infrastructure Release Update 19.4.0
     patchversion: 19.4.0.0.190716
     filename: p29708769_190000_Linux-x86-64.zip
 
 
-  # 12.1.0.2:
+# 12.1.0.2
+  #DATABASE PROACTIVE BUNDLE PATCH 12.1.0.2.181016 (includes DBBP 28259867 and OCW PSU 28259914)
   "28349951":
-    #DATABASE PROACTIVE BUNDLE PATCH 12.1.0.2.181016 (includes DBBP 28259867 and OCW PSU 28259914)
     patchversion: 12.1.0.2.181016
     filename: p28349951_121020_Linux-x86-64.zip
 
 
-  # 11.2.0.4:
-
+# 11.2.0.4:
+  #DATABASE PATCH SET UPDATE 11.2.0.4.170718
   "25869727":
-    #DATABASE PATCH SET UPDATE 11.2.0.4.170718
     patchversion: 11.2.0.4.170718
     filename: p25869727_112040_Linux-x86-64.zip
 
+  #DATABASE PATCH SET UPDATE 11.2.0.4.181016
   "28204707":
-    #DATABASE PATCH SET UPDATE 11.2.0.4.181016
     patchversion: 11.2.0.4.181016
     filename: p28204707_112040_Linux-x86-64.zip
 
+  #Grid PATCH SET UPDATE 11.2.0.4.181016
   "28429134":
-    #Grid PATCH SET UPDATE 11.2.0.4.181016
     patchversion: 11.2.0.4.181016
     filename: p28429134_112040_Linux-x86-64.zip

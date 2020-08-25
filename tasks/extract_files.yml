@@ -32,7 +32,7 @@
     object: "{{ opatch[oracle_version].filename }}"
     dest: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
     mode: get
-    overwrite: never
+    overwrite: always
 
 - name: Copy ocm response file
   aws_s3:
