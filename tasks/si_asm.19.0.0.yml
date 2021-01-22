@@ -3,6 +3,7 @@
 
 - debug: msg="{{ item.patch_id }}"
   with_items: "{{ patch_level[oracle_version].oneoff_patches }}"
+  when: patch_level[oracle_version].oneoff_patches is defined
 
 - name: srvctl stop home
   shell: "{{ oracle_home }}/bin/srvctl stop home -o {{ oracle_home }} -s {{ patch_directory }}/19c_srvctl.state -f"
