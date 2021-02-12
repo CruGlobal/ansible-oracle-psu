@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v3.2.0] - 2021-02-12
+- Remove hard coded S3 bucket.  This allows Ansible to setup instances in the disaster recovery environment.
+
 ## [v3.1.1] - 2021-01-27
 - Fix debug error if `oneoff_patches` is not defined
 
@@ -20,8 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 19c RU Patching Support
 - Re-write of how patch variables are defined.
 
-[Unreleased]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v3.1.1...HEAD
+[Unreleased]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v3.2.0...HEAD
 
+[v3.2.0]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v3.1.1...v3.2.0
 [v3.1.1]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v3.1.0...v3.1.1
 [v3.1.0]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v3.0.0...v3.1.0
 [v3.0.0]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v2.0.0...v3.0.0

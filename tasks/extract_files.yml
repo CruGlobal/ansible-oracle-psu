@@ -11,7 +11,7 @@
 
 - name: Copy quarterly patch from S3
   aws_s3:
-    bucket: cru-oracle-install
+    bucket: "{{ s3_install_bucket }}"
     object: "{{ quarterly_patches[patch_id].filename }}"
     dest: "{{ patch_directory}}/{{ quarterly_patches[patch_id].filename }}"
     mode: get
@@ -28,7 +28,7 @@
 
 - name: Copy OPatch
   aws_s3:
-    bucket: cru-oracle-install
+    bucket: "{{ s3_install_bucket }}"
     object: "{{ opatch[oracle_version].filename }}"
     dest: "{{ oracle_stage_install }}/{{ opatch[oracle_version].filename }}"
     mode: get
@@ -36,7 +36,7 @@
 
 - name: Copy ocm response file
   aws_s3:
-    bucket: cru-oracle-install
+    bucket: "{{ s3_install_bucket }}"
     object: ocm.rsp
     dest: "{{ patch_directory}}/ocm.rsp"
     mode: get
@@ -45,7 +45,7 @@
 
 - name: Copy oneoff patches from S3
   aws_s3:
-    bucket: cru-oracle-install
+    bucket: "{{ s3_install_bucket }}"
     object: "{{ item.filename }}"
     dest: "{{ patch_directory}}/{{ item.filename }}"
     mode: get
