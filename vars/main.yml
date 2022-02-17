@@ -3,7 +3,7 @@
 # Files should exist in path defined by oracle_stage_install.
 opatch:
   19.0.0:
-    version: 12.2.0.1.28
+    version: 12.2.0.1.29
     filename: p6880880_190000_Linux-x86-64.zip
   12.2.0.1:
     version: 12.2.0.1.9
@@ -18,6 +18,11 @@ opatch:
 
 quarterly_patches:
 # 19.0.0
+# GI RELEASE UPDATE 19.13.0.0.0 (October 2021 RU)
+  "33248471":
+    patchversion: 19.13.0.0.211019
+    filename: p33248471_190000_Linux-x86-64.zip
+
 # GI RELEASE UPDATE 19.12.0.0.0 (July 2021 RU)
   "32895426":
     patchversion: 19.12.0.0.210720
