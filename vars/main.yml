@@ -19,9 +19,9 @@ opatch:
 quarterly_patches:
 # 19.0.0
 # GI RELEASE UPDATE 19.13.0.0.0 (October 2021 RU)
-  "33248471":
+  "33182768":
     patchversion: 19.13.0.0.211019
-    filename: p33248471_190000_Linux-x86-64.zip
+    filename: p33182768_190000_Linux-x86-64.zip
 
 # GI RELEASE UPDATE 19.12.0.0.0 (July 2021 RU)
   "32895426":
