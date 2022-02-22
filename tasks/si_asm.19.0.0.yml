@@ -78,6 +78,16 @@
   environment: "{{ env }}"
   become_user: "{{ oracle_user }}"
 
+- block:
+    - name: Get list of database names on host
+      shell: "pgrep --list-name ora_smon_ | sed 's/ora_smon_//' | sort -k2 |  while read pid sid; do HOME=$(readlink --canonicalize --no-newline /proc/$pid/exe | sed 's/\\/bin\\/oracle//g'); [ ${HOME} = '{{ oracle_home }}' ] && printf '%s\\n' $sid || true; done"
+      register: dblist
+      tags: datapatch
+
+    - name: Load Modified SQL Files into the Database
+      include: run_catbundle.yml
+      tags: catbundle
+
 - name: remove state file
   file:
     path: "{{ patch_directory }}/19c_srvctl.state"
