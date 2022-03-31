@@ -1,0 +1,23 @@
+---
+
+- block:
+  - name: Get active db instance list
+    include_tasks: get_dbinstance_list.yml
+
+
+  - name: Set OJVM event
+    shell: |
+      ORACLE_SID="{{ item | quote }}"; export ORACLE_SID
+      $ORACLE_HOME/bin/sqlplus /nolog <<-EOF
+      connect / as sysdba
+      alter system set events '29579 trace name context forever';
+      exit;
+      EOF
+    become_user: "{{ oracle_user }}"
+    register: set_ojvm_event_output
+    environment: "{{ env }}"
+    with_items: "{{ dblist.stdout_lines }}"
+    ignore_errors: true
+
+  run_once: true
+  when: patch_level[oracle_version].oneoff_patches is defined

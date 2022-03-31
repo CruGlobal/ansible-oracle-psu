@@ -1,0 +1,30 @@
+---
+
+- block:
+  - debug: msg="{{ item.patch_id }}"
+    with_items: "{{ patch_level[oracle_version].oneoff_patches }}"
+
+
+  - name: Run srvctl stop home
+    include_tasks: srvctl_stop_home.yml
+
+
+  - name: Rollback one-off patches
+    shell: $ORACLE_HOME/OPatch/opatch nrollback -local -silent -id {{ item.patch_id | quote }}
+    environment: "{{ env }}"
+    become_user: "{{ oracle_user }}"
+    register: oneoff_rollback_psu
+    with_items: "{{ patch_level[oracle_version].oneoff_patches }}"
+    ignore_errors: true
+
+
+  - name: Run srvctl start home
+    include_tasks: srvctl_start_home.yml
+
+
+  - name: remove state file
+    file:
+      path: "{{ patch_directory }}/19c_srvctl.state"
+      state: absent
+
+  when: patch_level[oracle_version].oneoff_patches is defined

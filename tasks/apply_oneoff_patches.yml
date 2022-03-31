@@ -1,0 +1,43 @@
+---
+
+- block:
+  - name: Run srvctl stop home
+    include_tasks: srvctl_stop_home.yml
+
+
+  - name: Create one-off patch list file
+    template:
+      src: patch_list.j2
+      dest: "{{ patch_directory }}/patch_list.txt"
+      owner: "{{ oracle_user }}"
+      group: "{{ oracle_group }}"
+
+
+  - name: Run opatch conflict checking for one-off patches
+    shell: $ORACLE_HOME/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory | quote }}/patch_list.txt
+    environment: "{{ env }}"
+    become_user: "{{ oracle_user }}"
+    register: opatch_conflicts_out
+
+  - debug: var=opatch_conflicts_out.stdout_lines
+
+
+  - name: Apply one-off patches
+    shell: $ORACLE_HOME/OPatch/opatch napply -local -silent -phBaseFile {{ patch_directory | quote }}/patch_list.txt
+    environment: "{{ env }}"
+    become_user: "{{ oracle_user }}"
+    register: opatch_apply_out
+
+  - debug: var=opatch_apply_out.stdout_lines
+
+
+  - name: Run srvctl start home
+    include_tasks: srvctl_start_home.yml
+
+
+  - name: Remove state file
+    file:
+      path: "{{ patch_directory }}/19c_srvctl.state"
+      state: absent
+
+  when: patch_level[oracle_version].oneoff_patches is defined

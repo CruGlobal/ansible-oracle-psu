@@ -1,0 +1,36 @@
+---
+- block:
+  #- name: Run opatchauto analyze
+  #  shell: $ORACLE_HOME/OPatch/opatchauto apply {{ patch_directory | quote }}/{{ patch_id | quote }} -analyze
+  #  environment:
+  #    ORACLE_HOME: "{{ gi_home }}"
+  #  register: prereq_check_out
+  #  when: patch_level[oracle_version].patch_id is defined
+  #
+  #- debug: var=prereq_check_out.stdout_lines
+
+  - name: Patch GI and DB homes
+    shell: $ORACLE_HOME/OPatch/opatchauto apply {{ patch_directory | quote }}/{{ patch_id | quote }}
+    environment:
+      ORACLE_HOME: "{{ gi_home }}"
+    register: opatchauto_out
+    when: patch_level[oracle_version].patch_id is defined
+
+
+  - name: Patch older release DB homes
+    shell: $ORACLE_HOME/OPatch/opatchauto apply {{ patch_directory | quote }}/{{ patch_id | quote }}
+    environment:
+      ORACLE_HOME: "{{ oracle_home }}"
+    register: opatchauto_out
+    when: patch_level[oracle_version].patch_id is defined and oracle_version != gi_version
+
+
+  - name: Verify services are online
+    shell: $ORACLE_HOME/bin/crsctl stat res -t
+    environment:
+      ORACLE_HOME: "{{ gi_home }}"
+    become_user: "{{ oracle_user }}"
+    register: crsctl_stat_res_out
+    when: patch_level[oracle_version].patch_id is defined
+
+  - debug: var=crsctl_stat_res_out.stdout_lines
