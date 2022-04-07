@@ -5,7 +5,8 @@
   environment: "{{ env }}"
   become_user: "{{ oracle_user }}"
   ignore_errors: true
-  when: patch_level[oracle_version].oneoff_patches is defined and not is_rac
+  when: (patch_level[oracle_version].oneoff_patches is defined and 
+        (is_rac is not defined or not is_rac))
 
 
 - name: Run srvctl start cluster home
@@ -13,4 +14,5 @@
   environment: "{{ env }}"
   become_user: "{{ oracle_user }}"
   ignore_errors: true
-  when: patch_level[oracle_version].oneoff_patches is defined and is_rac
+  when: (patch_level[oracle_version].oneoff_patches is defined and 
+        (is_rac is defined and is_rac))
