@@ -1,58 +1,84 @@
 ---
+- debug: msg="ru_si_asm.19.0.0.yml - Patch Single Instance ASM (Oracle Restart)"
 
-- name: Set OJVM event
-  include_tasks:
-    file: set_ojvm_event.yml
-    apply:
-      tags: set_ojvm_event
-  run_once: true
-  tags: set_ojvm_event
+- debug: msg="{{ item.patch_id }}"
+  with_items: "{{ patch_level[oracle_version].oneoff_patches }}"
+  when: patch_level[oracle_version].oneoff_patches is defined
 
-- name: Stop the DB instances, rollback one-off patches, and restart the DB instances
-  include_tasks:
-    file: rollback_oneoff_patches.yml
-    apply:
-      tags: rollback_oneoff_patches
-  with_items: "{{ ansible_play_hosts }}"
-  loop_control:
-    loop_var: host_item
-  when: inventory_hostname == host_item
-  tags: rollback_oneoff_patches
+- name: srvctl stop home
+  shell: "{{ oracle_home }}/bin/srvctl stop home -o {{ oracle_home }} -s {{ patch_directory }}/19c_srvctl.state -f"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  when: patch_level[oracle_version].oneoff_patches is defined
+  ignore_errors: true
 
-- name: Patch GI and DB homes
-  include_tasks:
-    file: run_opatchauto.yml
-    apply:
-      tags: run_opatchauto
-  with_items: "{{ ansible_play_hosts }}"
-  loop_control:
-    loop_var: host_item
-  when: inventory_hostname == host_item
-  tags: run_opatchauto
+- name: Rollback one-off patches
+  shell: "opatch nrollback -silent -id {{ item.patch_id }}"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: oneoff_rollback_psu
+  when: patch_level[oracle_version].oneoff_patches is defined
+  with_items: "{{ patch_level[oracle_version].oneoff_patches }}"
+  ignore_errors: true
 
-- name: Stop the DB instances, apply one-off patches, and restart the DB instances
-  include_tasks:
-    file: apply_oneoff_patches.yml
-    apply:
-      tags: apply_oneoff_patches
-  with_items: "{{ ansible_play_hosts }}"
-  loop_control:
-    loop_var: host_item
-  when: inventory_hostname == host_item
-  tags: apply_oneoff_patches
+- name: srvctl start home
+  shell: "{{ oracle_home }}/bin/srvctl start home -o {{ oracle_home }} -s {{ patch_directory }}/19c_srvctl.state"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  when: patch_level[oracle_version].oneoff_patches is defined
 
-- name: Run datapatch
-  include_tasks:
-    file: run_datapatch.yml
-    apply:
-      tags: run_datapatch
-  run_once: true
-  tags: run_datapatch
+- name: remove state file
+  file:
+    path: "{{ patch_directory }}/19c_srvctl.state"
+    state: absent
 
-#- name: Unset OJVM event
-#  include_tasks:
-#    file: unset_ojvm_event.yml
-#    apply:
-#      tags: unset_ojvm_event
-#  run_once: true
-#  tags: unset_ojvm_event
+- name: SI (ASM) | Patch 19c GI and Database Homes
+  shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }}"
+  register: gi_opatchauto
+  when:
+    - oracle_version == gi_version
+
+- debug: var=gi_opatchauto.stdout_lines
+
+- name: srvctl stop home
+  shell: "{{ oracle_home }}/bin/srvctl stop home -o {{ oracle_home }} -s {{ patch_directory }}/19c_srvctl.state -f"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+
+- name: Template patch list
+  template:
+    src: patch_list.j2
+    dest: "{{ patch_directory }}/patch_list.txt"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+  when: patch_level[oracle_version].oneoff_patches is defined
+
+- name: Opatch prereq check for oneoff patches
+  shell: opatch prereq CheckConflictAgainstOHWithDetail -phBaseFile {{ patch_directory }}/patch_list.txt
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: oneoff_conflicts_psu
+  when: patch_level[oracle_version].oneoff_patches is defined
+
+- debug: var=oneoff_conflicts_psu.stdout_lines
+  when: patch_level[oracle_version].oneoff_patches is defined
+
+- name: Apply one-off patches
+  shell: opatch napply -silent -phBaseFile {{ patch_directory }}/patch_list.txt
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  register: oneoff_apply_psu
+  when: patch_level[oracle_version].oneoff_patches is defined
+
+- debug: var=oneoff_apply_psu.stdout_lines
+  when: patch_level[oracle_version].oneoff_patches is defined
+
+- name: srvctl start home
+  shell: "{{ oracle_home }}/bin/srvctl start home -o {{ oracle_home }} -s {{ patch_directory }}/19c_srvctl.state"
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+
+- name: remove state file
+  file:
+    path: "{{ patch_directory }}/19c_srvctl.state"
+    state: absent

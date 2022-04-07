@@ -1,58 +1,45 @@
 ---
+- debug: msg="ru_rac.19.0.0.yml - Patch RAC GI Home and DB Home(s)"
 
-- name: Set OJVM event
-  include_tasks:
-    file: set_ojvm_event.yml
-    apply:
-      tags: set_ojvm_event
-  run_once: true
-  tags: set_ojvm_event
+# - name: Opatchauto Analyze
+#   shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }} -analyze"
+#   register: prereq_check
+#
+# - debug: var=prereq_check.stdout_lines
 
-- name: Stop the DB instances, rollback one-off patches, and restart the DB instances
-  include_tasks:
-    file: rollback_oneoff_patches.yml
-    apply:
-      tags: rollback_oneoff_patches
-  with_items: "{{ ansible_play_hosts }}"
-  loop_control:
-    loop_var: host_item
-  when: inventory_hostname == host_item
-  tags: rollback_oneoff_patches
+- block:
+    - name: RAC | Patch 19c GI and Database Homes
+      shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }}"
+      register: gi_opatchauto
 
-- name: Patch GI and DB homes
-  include_tasks:
-    file: run_opatchauto.yml
-    apply:
-      tags: run_opatchauto
-  with_items: "{{ ansible_play_hosts }}"
-  loop_control:
-    loop_var: host_item
-  when: inventory_hostname == host_item
-  tags: run_opatchauto
+    - debug: var=gi_opatchauto.stdout_lines
 
-- name: Stop the DB instances, apply one-off patches, and restart the DB instances
-  include_tasks:
-    file: apply_oneoff_patches.yml
-    apply:
-      tags: apply_oneoff_patches
-  with_items: "{{ ansible_play_hosts }}"
-  loop_control:
-    loop_var: host_item
-  when: inventory_hostname == host_item
-  tags: apply_oneoff_patches
+    - name: Verify services are online
+      shell: "{{ gi_home }}/bin/crsctl stat res -t"
+      become_user: "{{ oracle_user }}"
+      register: stat_res_t
 
-- name: Run datapatch
-  include_tasks:
-    file: run_datapatch.yml
-    apply:
-      tags: run_datapatch
-  run_once: true
-  tags: run_datapatch
+    - debug: var=stat_res_t.stdout_lines
+    #
+    # - name: Pause after first node
+    #   pause: prompt="Verify everything's running on the first node."
 
-#- name: Unset OJVM event
-#  include_tasks:
-#    file: unset_ojvm_event.yml
-#    apply:
-#      tags: unset_ojvm_event
-#  run_once: true
-#  tags: unset_ojvm_event
+  when: is_master
+
+
+
+- block:
+    - name: RAC | Patch 19c GI and Database Homes
+      shell: "{{ gi_home }}/OPatch/opatchauto apply {{ patch_directory }}/{{ patch_id }}"
+      register: gi_opatchauto
+
+    - debug: var=gi_opatchauto.stdout_lines
+
+    - name: Verify services are online
+      shell: "{{ gi_home }}/bin/crsctl stat res -t"
+      become_user: "{{ oracle_user }}"
+      register: stat_res_t
+
+    - debug: var=stat_res_t.stdout_lines
+
+  when: not is_master
