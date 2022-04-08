@@ -1,0 +1,13 @@
+---
+
+- name: Get active db instance list
+  shell: |
+    pgrep --list-name --list-full ora_smon_ | sed 's/ora_smon_//' | sort -k2 |
+    while read PID SID
+    do
+      PDIR="$(readlink --canonicalize --no-newline /proc/$PID/exe | sed 's/\/bin\/oracle//g')"
+      [ "${PDIR}" = "${ORACLE_HOME}" ] && printf '%s\n' $SID || true
+    done
+  register: dblist
+  environment:
+    ORACLE_HOME: "{{ oracle_home }}"

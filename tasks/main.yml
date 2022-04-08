@@ -20,8 +20,8 @@
 #   when: agent_home is defined and shutdown_listener
 #   tags: stop_agent
 
-- name: Apply Quarterly Patch
-  include: "{{ oracle_install_type }}.{{ oracle_version }}.yml"
+- name: Apply Quarterly Patches
+  include: apply_quarterly_patches.yml
   become_user: "{{ oracle_user }}"
   when: not rollback_psu
   tags: apply

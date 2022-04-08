@@ -1,0 +1,18 @@
+---
+
+- name: Run srvctl stop standalone home
+  shell: $ORACLE_HOME/bin/srvctl stop home -oraclehome $ORACLE_HOME -statefile {{ patch_directory | quote }}/19c_srvctl.state -f
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  when: (patch_level[oracle_version].oneoff_patches is defined and 
+        (is_rac is not defined or not is_rac))
+  ignore_errors: true
+
+
+- name: Run srvctl stop cluster home
+  shell: $ORACLE_HOME/bin/srvctl stop home -oraclehome $ORACLE_HOME -node $(hostname --short) -statefile {{ patch_directory | quote }}/19c_srvctl.state -f
+  environment: "{{ env }}"
+  become_user: "{{ oracle_user }}"
+  when: (patch_level[oracle_version].oneoff_patches is defined and
+        (is_rac is defined and is_rac))
+  ignore_errors: true

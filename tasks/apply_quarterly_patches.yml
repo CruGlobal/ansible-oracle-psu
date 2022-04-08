@@ -1,0 +1,58 @@
+---
+
+- name: Set OJVM event
+  include_tasks:
+    file: set_ojvm_event.yml
+    apply:
+      tags: set_ojvm_event
+  run_once: true
+  tags: set_ojvm_event
+
+- name: Stop the DB instances, rollback one-off patches, and restart the DB instances
+  include_tasks:
+    file: rollback_oneoff_patches.yml
+    apply:
+      tags: rollback_oneoff_patches
+  with_items: "{{ ansible_play_hosts }}"
+  loop_control:
+    loop_var: host_item
+  when: inventory_hostname == host_item
+  tags: rollback_oneoff_patches
+
+- name: Patch GI and DB homes
+  include_tasks:
+    file: run_opatchauto.yml
+    apply:
+      tags: run_opatchauto
+  with_items: "{{ ansible_play_hosts }}"
+  loop_control:
+    loop_var: host_item
+  when: inventory_hostname == host_item
+  tags: run_opatchauto
+
+- name: Stop the DB instances, apply one-off patches, and restart the DB instances
+  include_tasks:
+    file: apply_oneoff_patches.yml
+    apply:
+      tags: apply_oneoff_patches
+  with_items: "{{ ansible_play_hosts }}"
+  loop_control:
+    loop_var: host_item
+  when: inventory_hostname == host_item
+  tags: apply_oneoff_patches
+
+- name: Run datapatch
+  include_tasks:
+    file: run_datapatch.yml
+    apply:
+      tags: run_datapatch
+  run_once: true
+  tags: run_datapatch
+
+#- name: Unset OJVM event
+#  include_tasks:
+#    file: unset_ojvm_event.yml
+#    apply:
+#      tags: unset_ojvm_event
+#  run_once: true
+#  tags: unset_ojvm_event

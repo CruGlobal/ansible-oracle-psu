@@ -1,0 +1,34 @@
+---
+
+- block:
+  - name: Get active db instance list
+    include_tasks: get_dbinstance_list.yml
+
+  - name: Run datapatch to load modified SQL files into the database
+    shell: |
+      ORACLE_SID="{{ item | quote }}"; export ORACLE_SID
+      ${ORACLE_HOME}/OPatch/datapatch -verbose
+    become_user: "{{ oracle_user }}"
+    register: datapatch_output
+    environment: "{{ env }}"
+    with_items: "{{ dblist.stdout_lines }}"
+    failed_when: datapatch_output.rc == 1
+    ignore_errors: true
+
+  - name: Recompile invalid database objects
+    shell: |
+      ORACLE_SID="{{ item | quote }}"; export ORACLE_SID
+      ${ORACLE_HOME}/bin/sqlplus /nolog <<-EOF
+      connect / as sysdba
+      @?/rdbms/admin/utlrp.sql
+      exit;
+      EOF
+    become_user: "{{ oracle_user }}"
+    register: recompile_output
+    environment: "{{ env }}"
+    with_items: "{{ dblist.stdout_lines }}"
+    ignore_errors: true
+
+  run_once: true
+  when: (patch_level[oracle_version].oneoff_patches is defined) or
+        (patch_level[oracle_version].patch_id is defined and oracle_version != gi_version)
