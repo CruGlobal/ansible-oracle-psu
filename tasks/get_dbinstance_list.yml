@@ -8,6 +8,7 @@
       PDIR="$(readlink --canonicalize --no-newline /proc/$PID/exe | sed 's/\/bin\/oracle//g')"
       [ "${PDIR}" = "${ORACLE_HOME}" ] && printf '%s\n' $SID || true
     done
+  become_user: root
   register: dblist
   environment:
     ORACLE_HOME: "{{ oracle_home }}"
