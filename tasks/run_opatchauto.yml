@@ -13,6 +13,7 @@
     shell: $ORACLE_HOME/OPatch/opatchauto apply {{ patch_directory | quote }}/{{ patch_id | quote }}
     environment:
       ORACLE_HOME: "{{ gi_home }}"
+    become_user: root
     register: opatchauto_out
     when: patch_level[oracle_version].patch_id is defined
 
@@ -21,6 +22,7 @@
     shell: $ORACLE_HOME/OPatch/opatchauto apply {{ patch_directory | quote }}/{{ patch_id | quote }}
     environment:
       ORACLE_HOME: "{{ oracle_home }}"
+    become_user: root
     register: opatchauto_out
     when: patch_level[oracle_version].patch_id is defined and oracle_version != gi_version
 
