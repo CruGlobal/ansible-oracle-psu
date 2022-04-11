@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v4.0.1] - 2022-04-11
+- Add the become user root directive for required tasks
+
 ## [v4.0.0] - 2022-04-07
 - Added 19c October 2021 RU and created unified patching tasks
 
@@ -29,8 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 19c RU Patching Support
 - Re-write of how patch variables are defined.
 
-[Unreleased]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v4.0.0...master
+[Unreleased]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v4.0.1...master
 
+[v4.0.1]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v4.4.0...v4.0.1
 [v4.0.0]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v3.3.0...v4.0.0
 [v3.3.0]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v3.2.0...v3.3.0
 [v3.2.0]: https://github.com/CruGlobal/ansible-oracle-psu/compare/v3.1.1...v3.2.0
